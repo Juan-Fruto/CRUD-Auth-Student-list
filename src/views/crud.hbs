@@ -1,0 +1,53 @@
+<form action="/students/add", method="POST" class="container rounded-3" style="width: 80%; padding: 40px 105px; margin: 0px 10%; margin-bottom: -70px;">
+    <br><h1>CRUD page</h1><br>
+    <div class="row">
+        <div class="col-md-3" style="float:left;">
+            <label for="title">Writte the name:</label>
+            <input type="text" name="name" id="name" placeholder="name">
+        </div>
+        <div class="col-md-3" style="float:left;">
+            <label for="description">Writte the grade:</label>
+            <input type="number" name="grade" id="grade" placeholder="grade">
+        </div>
+        <div class="form-check form-switch col-md-3" style="float:left;">
+            <label for="status">Select the status:</label>
+            <input type="checkbox" name="status" class="form-check-input">
+        </div><br>
+        <div class="col-md-3"></div>
+        <div class="col-md-2">
+            <button class="btn btn-primary">Add</button>
+        </div>
+        <div class="col-md-10"></div>
+    </div>
+</form>
+
+<div style="width: 80%; padding: 40px 105px; margin: -120px 100px;">
+    <table class="table table-info table-striped m-5" style="width: 900px;">
+        <thead>
+            <tr class="table-dark">
+                <td>name</td>
+                <td>grade</td>
+                <td>status</td>
+                <td>actions</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each document}}
+            <tr>
+                <td>{{name}}</td>
+                <td>{{grade}}</td>
+                <td>
+                    {{#if status}}
+                        registered
+                    {{else}}
+                        de-registered
+                    {{/if}}
+                </td>
+                <td><a href="/students/{{_id}}/edit">edit</a></td>
+                <td><a href="/students/{{_id}}/delete">delete</a></td><br>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
