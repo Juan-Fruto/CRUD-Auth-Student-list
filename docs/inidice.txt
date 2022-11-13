@@ -1,8 +1,0 @@
-Indice del Contenido:
-00:00 Introducción
-01:17 Configuracion del Proyecto
-08:01 Servidor de Express
-20:12 Express Routes
-30:25 EJS, Template engine
-35:29 Bootstrap5
-01:00:49 Despliegue en Heroku
