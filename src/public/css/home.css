@@ -1,0 +1,51 @@
+.container {
+    margin-top: 40px;
+    background-color: none;
+    width: 100%;
+    height: auto;
+    padding: 20px 5%;
+}
+
+.add {
+    background-color: transparent;
+    border-radius: 8%;
+    border-width: 1px;
+    padding-left: 0px;
+}
+
+.add:hover{
+    background-color: gray;
+}
+
+.col-md-1 {
+    height: 120px;
+    width: 120px;
+    border-color: black;
+    border-width: 3px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 8%;
+    align-content: center;
+    margin: 20px 40px;
+}
+
+/* .group {
+    margin: 10px 10px;
+    width: 80px;
+    height: 80px;
+    border: none;
+    background-color: transparent;
+} */
+
+.group {
+    width: 100%;
+    height: 100%;
+    margin: 0% 0%;
+    /* border: none; */
+    background-color: transparent;
+}
+
+.content {
+    background-color: white;
+    padding: 10px 10px;
+}

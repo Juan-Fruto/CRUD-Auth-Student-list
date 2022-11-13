@@ -1,5 +1,7 @@
 import {Schema, model} from 'mongoose';
 
+//esquema grado, el primer atributo es grado y grupo y el segundo es un array con los estudiantes
+
 const studentsSchema = new Schema(
     {
         name: {
@@ -10,7 +12,7 @@ const studentsSchema = new Schema(
         },
         grade: {
             type: Number,
-            required: true
+            required: false
         },
         status:{
             type: Boolean,

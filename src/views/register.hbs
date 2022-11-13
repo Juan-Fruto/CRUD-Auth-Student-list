@@ -1,14 +1,15 @@
-<header style="background-color: rgb(20, 35, 95); height: 60px;">
-     <div class="container-sm">
+<link rel="stylesheet" href="../css/register.css">
+
+<header>
+    <div class="container-sm">
         <a href="/">
-            <img src="images/back.png" alt="Go back" class="img-fluid"/>
+            <img src="../images/back.png" alt="Go back" class="img-fluid"/>
         </a><br>
     </div>
 </header>
-<hr>
-<br>
+<br/><br/>
 <div class="container p-10 m-10 align-center-items">
-    <form class="row g-2 needs-validation" action="/register" method="POST">
+    <form class="row g-3 needs-validation" action="/register" method="POST">
         
         <div class="col-md-3">
             <label for="validationCustom01" class="form-label" for="names">Name(s)</label>
@@ -27,12 +28,22 @@
          <div class="col-md-3">
             <label for="validationCustom04" class="form-label" for="group">Group you teach</label>
             <select class="form-select" name="group" id="group">
-                <option selected disabled>Open this select menu</option>
-                {{#if group}}
+                <option class="placeholder" selected disabled>Open this select menu</option>
+                {{!-- {{#if group}}
                     <option value="5°B" selected>5°B</option>
                 {{else}}
                     <option value="5°B">5°B</option>    
-                {{/if}}
+                {{/if}} --}}
+                    <option value="1°A">1°A</option>
+                    <option value="1°B">1°B</option>
+                    <option value="2°A">2°A</option>
+                    <option value="2°B">2°B</option>
+                    <option value="3°A">3°A</option>
+                    <option value="3°B">3°B</option>
+                    <option value="4°A">4°A</option>
+                    <option value="4°B">4°B</option>
+                    <option value="5°B">5°B</option>
+                    <option value="5°D">5°D</option>
             </select>
         </div>
 
@@ -40,7 +51,7 @@
             <label for="validationCustomUsername" class="form-label" for="username">Username</label>
             <div class="input-group has-validation">
             <span class="input-group-text" id="inputGroupPrepend">#</span>
-            <input type="text" class="form-control" name="username" id="username" value="{{username}}" placeholder="Your ucol email without the @ or your account number">
+            <input type="text" class="form-control" name="username" id="username" value="{{username}}" placeholder="ucol email-without @ or account number">
             </div>
         </div>
 

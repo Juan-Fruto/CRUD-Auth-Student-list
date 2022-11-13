@@ -20,7 +20,13 @@ app.engine('.hbs', engine({
     layoutDir: path.join(app.get('views'), 'layouts'),
     partialsDir: path.join(app.get('views'), 'partials'),
     defaultLayout: 'main',
-    extname: ".hbs"
+    extname: ".hbs",
+    helpers: {
+      graterThan5: function (value){
+        value = value + 1;
+        return (value > 0 && value % 6 == 0 ?  true :  false);
+      }
+    }
 }));
 
 app.set('view engine', '.hbs')
@@ -40,6 +46,13 @@ app.use(
   );
   app.use(passport.initialize());
   app.use(passport.session());
+
+  app.use(express.static(path.join(__dirname, "public")));
+
+  // app.use(function(req, res, next) {
+  //   res.status(404).render('error404', {noNavBar: true});
+  // });
+  
 
 // routes
 

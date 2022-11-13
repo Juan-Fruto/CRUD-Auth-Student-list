@@ -1,53 +1,78 @@
-<form action="/students/add", method="POST" class="container rounded-3" style="width: 80%; padding: 40px 105px; margin: 0px 10%; margin-bottom: -70px;">
-    <br><h1>CRUD page</h1><br>
-    <div class="row">
-        <div class="col-md-3" style="float:left;">
-            <label for="title">Writte the name:</label>
-            <input type="text" name="name" id="name" placeholder="name">
-        </div>
-        <div class="col-md-3" style="float:left;">
-            <label for="description">Writte the grade:</label>
-            <input type="number" name="grade" id="grade" placeholder="grade">
-        </div>
-        <div class="form-check form-switch col-md-3" style="float:left;">
-            <label for="status">Select the status:</label>
-            <input type="checkbox" name="status" class="form-check-input">
-        </div><br>
-        <div class="col-md-3"></div>
-        <div class="col-md-2">
-            <button class="btn btn-primary">Add</button>
-        </div>
-        <div class="col-md-10"></div>
-    </div>
-</form>
+<link rel="stylesheet" href="../css/crud.css">
 
-<div style="width: 80%; padding: 40px 105px; margin: -120px 100px;">
-    <table class="table table-info table-striped m-5" style="width: 900px;">
-        <thead>
-            <tr class="table-dark">
-                <td>name</td>
-                <td>grade</td>
-                <td>status</td>
-                <td>actions</td>
-                <td></td>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each document}}
-            <tr>
-                <td>{{name}}</td>
-                <td>{{grade}}</td>
-                <td>
+<div>
+    <div>
+        <div>
+            <div>
+                <div class="">
+                    <h1 class="text-center mb-0 mt-5">CRUD page</h1>
+
+                    <form action="/students/add", method="POST">
+                        <hr/ class="mb-4 mt-1">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <label for="title" class="form-label fw-bold">Writte the name:</label>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="name">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="description" class="form-label fw-bold">Writte the grade:</label>
+                                <input type="number" class="form-control" step="0.1" name="grade" id="grade" placeholder="subject grade">
+                            </div>
+                            <div class="form-check form-switch col-md-2">
+                                <label for="status" class="form-label fw-bold">Select the status:</label><br/>
+                                <input type="checkbox" class="form-check-input" name="status" title="Select the student's academic status, whether regitered or deregistered">
+                                <span class="labels" data-on="registered" data-off="deregistered"></span>
+                            </div><br>
+                            <div class="d-grid gap-4 col-md-2 mx-auto">
+                                <div class="form-label"></div>
+                                <button class="btn btn-primary">Add</button>
+                            </div>
+                            <div class="col-md-12"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- table table-info table-bordered table-striped m-5 mt-0 mb-0 --}}
+
+<div class="container-md">
+        <table class="table table-md table-info table-striped mt-0">
+            <thead>
+                <tr class="table-dark">
+                    <td class="td-name">Name</td>
+                    <td class="td-grade">Subject grade</td>
+                    <td class="td-status">Status</td>
+                    <td class="td-actions-1">Actions</td>
+                    <td class="td-actions-2"></td>
+                    <td class="td-actions-3"></td>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each document}}
+                <tr>
+                    <td>{{name}}</td>
+                    <td>{{grade}}</td>
+                    <td>
+                        {{#if status}}
+                            registered
+                        {{else}}
+                            de-registered
+                        {{/if}}
+                    </td>
+                    <td><a href="/students/{{_id}}/edit" class="edit">Edit</a></td>
+                    <td><a href="/students/{{_id}}/delete" class="delete" onclick="return confirm('Are you sure to delete {{name}} from the list?');">Delete</a></td><br>
                     {{#if status}}
-                        registered
+                        <td class="status"></td>
                     {{else}}
-                        de-registered
+                        <td class= "status">
+                            <button class="btn-status" title="this student is de-registered"></button>
+                        </td>
                     {{/if}}
-                </td>
-                <td><a href="/students/{{_id}}/edit">edit</a></td>
-                <td><a href="/students/{{_id}}/delete">delete</a></td><br>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
 </div>

@@ -1,11 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(102, 153, 51);">
+<nav class="navbar navbar-expand-md navbar-light" style="background-color: rgb(102, 153, 51);">
     <div class="container-fluid">
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link text-white" href="/tabla" class="text-white">Home</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/students/CRUD" class="text-white">Tabla</a></li>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link text-white" href="/home" class="text-white">Home</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/students/CRUD" class="text-white">Table</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="/about" class="text-white">About</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/" class="text-white">Cerrar sesion</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/" class="text-white">Logout</a></li>
+                {{!-- <div class="">
+                    <input type="checkbox" class="form-check-input" name="" id="themeApp">
+                </div> --}}
             </ul>            
         </div>
     </div>

@@ -2,12 +2,22 @@ import { Router} from 'express';
 import passport from 'passport';
 import Stdn from '../models/Stdn';
 import Users from '../models/Users';
+import Group from '../models/Group';
+//import isAuth from '../helpers/validateAuth';
 
 const router =  Router();
 
 //rutas de la interface de login
 
 router.get('/', function (req, res) {
+    console.log('req.params.status', req.params.status);
+    console.log('decodeURIComponent(req.params.status)', decodeURIComponent(req.params.status));
+    console.log('req.query.status', req.query.status);
+    console.log('tipo', typeof(req.query.status));
+    console.log('decodeURIComponent(req.query.status)', decodeURIComponent(req.query.status));
+    if(req.query.status){
+        res.render('login', {noNavBar: true, success: req.query.status});
+    }
     res.render('login', {noNavBar: true});
 });
 
@@ -23,7 +33,7 @@ router.get('/register', function (req, res) {
     res.render('register', {noNavBar: true});
 });
 
-router.post('/register', function (req, res) {
+router.post('/register', async function (req, res) {
     const {names, lastName, group, username, password, confirmPassword} = req.body;
 
     async function saveU(){
@@ -31,17 +41,31 @@ router.post('/register', function (req, res) {
         user.password = await user.encryptPassword(password);
         const userSaved = await user.save();
         console.log(userSaved);
+        const message = encodeURIComponent('Successful registration');
 
-        res.redirect('/');
+        res.redirect('/?status=' + message);
+    }
+
+    async function usernameFromMongo(){
+        const queryUsernames = await Users.find({username}, 'username').lean();
+        const userDB = queryUsernames[0].username;
+        return userDB;
     }
 
     try{
         const errors = [];
+        const existingUsername = await usernameFromMongo();
         if (password != confirmPassword){
             errors.push({text: 'Passwords don´t match'});
         }
         if (password.length < 4 || password.length > 12){
             errors.push({text:'Password must be 4 to 12 characters'});
+        }
+        if (names.length == 0 || lastName.length == 0 || username.length == 0){
+            errors.push({text: "the fields names, lastName, username and password are required"});
+        }
+        if (username == existingUsername){
+            errors.push({text: 'Username already exists '});
         }
         if (errors.length > 0){
             res.render('register', {
@@ -56,30 +80,62 @@ router.post('/register', function (req, res) {
             saveU();
         }
     } catch (error){
-        console.log(error.messages); 
-    } 
+        console.log(error.messages);
+    }
 });
 
 //rutas de la interface de CRUD
-router.get('/students/CRUD', async function (req, res) {
-    const query = await Stdn.find().lean();
+router.get('/students/CRUD',
+    // function(req, res, next) {
+    // if(req.isAuthenticated()){
+    //     return next;
+    // }
+    // res.redirect('/');
+    // },
+    async function (req, res) {
+    //hay que agragar un $match al inicio pasandole el id proveniente de home
+    const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
+    for (let i = 0; i < query.length; i++) {
+        if (query[i].grade == null){
+            query[i].grade = "--";
+        }
+      }
     res.render('crud', {document: query});
-}); 
+});
 
 router.post('/students/add', async function (req, res) {
-    try{
-        if(req.body.status == 'on'){
-            req.body.status = true;
-        } else{
-            req.body.status = false;
+    const errors = [];
+    if (req.body.name == 0) {
+        errors.push({text: 'Please insert a name'});
+    }
+    /*if (req.body.grade.length == 0){
+        errors.push({text: 'Please insert a grade'});
+    }*/
+    if (req.body.grade < 0 || req.body.grade > 10) {
+        errors.push({text: 'Grade must be between 0 and 10'});
+    }
+    if (errors.length > 0){
+        try {
+            const query = await Stdn.find().lean();
+            res.render('crud', {document: query, errors});
+        } catch (error) {
+            console.log(error.message);
         }
-        const stdn = Stdn(req.body);
-        const stdnSaved = await stdn.save();
-        console.log(stdnSaved);
-        res.redirect('/students/CRUD');
-    } catch (error){
-        console.log(error); 
-    } 
+    } else {
+        try{
+            if(req.body.status == 'on'){
+                req.body.status = true;
+            } else{
+                req.body.status = false;
+            }
+            const stdn = Stdn(req.body);
+            const stdnSaved = await stdn.save();
+            console.log(stdnSaved);
+            res.redirect('/students/CRUD');
+        } catch (error){
+            console.log(error);
+        }
+    }
 });
 
 router.get('/students/:id/delete', async function(req, res){
@@ -95,7 +151,7 @@ router.get('/students/:id/edit', async function(req, res){
         let object = await Stdn.findById(req.params.id).lean();
         console.log(req.params.id);
         console.log(typeof object.status, object.status);
-        
+
         res.render('edit', {object});
     } catch (error) {
         console.log(error.message);
@@ -103,22 +159,77 @@ router.get('/students/:id/edit', async function(req, res){
 });
 
 router.post('/students/:id/edit', async function(req, res){
+    const errors = [];
     console.log(typeof req.body.status);
     console.log(req.body.status);
+    if (req.body.name.length == 0) {
+        errors.push({text: 'Please insert a name'});
+    }
+    if (req.body.grade < 0 || req.body.grade > 10) {
+        errors.push({text: 'Grade must be between 0 and 10'});
+    }
     if(req.body.status == 'on' || req.body.status == 'true' || req.body.status == 'True' || req.body.status == true){
         req.body.status = true;
     } else{
         req.body.status = false;
     }
-    console.log(req.params.id);
-    await Stdn.findByIdAndUpdate(req.params.id, req.body);
-    res.redirect('/students/CRUD');
+    if (errors.length > 0){
+        try {
+            let object = await Stdn.findById(req.params.id).lean();
+            res.render('edit', {object, errors});
+        } catch (error) {
+            console.log(error.message);
+        }
+    } else {
+        console.log(req.params.id);
+        await Stdn.findByIdAndUpdate(req.params.id, req.body);
+        res.redirect('/students/CRUD');
+    }
 });
 
 //ruta de la interface about
 
 router.get('/about', function (req, res) {
     res.render('about');
+});
+
+//rutas de la interface home
+
+router.get('/home', function (req, res) {
+    const grupos = ['5b', '5c', '5d', '5e', '5f', '6a', '6b', '6c', '6d', '6e', '7a', '7b', '7c', '7d', '7e'];
+    res.render('home', {groups: grupos});
+});
+
+router.get('/home/addGroup', function (req, res){
+    res.render('group');
+});
+
+router.post('/home/group/add', async function (req, res){
+    //actualizar en la coleccion original e insertar a la coleccion del usuario que guarde los grupos en home, hacer
+    //validators para dicha funcion, verficar que no se repitan las clases
+    async function saveG() {
+        const group = new Group(req.body);
+        const groupSaved = await group.save();
+        res.redirect('/home');
+    }
+    try {
+        const errors = [];
+        if (!req.body.subeject_grade) {
+            errors.push({text: "Insert the grade"});
+        }
+        if (!req.body.career) {
+            errors.push({text: "Insert the career"});
+        }
+        if (errors.length > 0) {
+            res.render('group', {errors, subeject_grade, group, career});
+        } else {
+            saveG();
+        }
+    } catch (error) {
+
+    }
+    const {subeject_grade, group, career} = req.body;
+
 });
 
 export default router;
