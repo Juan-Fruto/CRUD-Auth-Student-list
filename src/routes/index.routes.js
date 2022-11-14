@@ -3,6 +3,7 @@ import passport from 'passport';
 import Stdn from '../models/Stdn';
 import Users from '../models/Users';
 import Group from '../models/Group';
+import jwt from 'jsonwebtoken';
 //import isAuth from '../helpers/validateAuth';
 
 const router =  Router();
@@ -47,6 +48,7 @@ router.post('/register', async function (req, res) {
     }
 
     async function usernameFromMongo(){
+        //change the query to findOne
         const queryUsernames = await Users.find({username}, 'username').lean();
         const userDB = queryUsernames[0].username;
         return userDB;
@@ -196,7 +198,7 @@ router.get('/about', function (req, res) {
 //rutas de la interface home
 
 router.get('/home', function (req, res) {
-    const grupos = ['5b', '5c', '5d', '5e', '5f', '6a', '6b', '6c', '6d', '6e', '7a', '7b', '7c', '7d', '7e'];
+const grupos = ['5°B', '5°C', '5°D', '5°E', '5°F', '6°A', '6°B', '6°C', '6°D', '6°E', '7°A', '7°B', '7°C', '7°D', '7°E'];
     res.render('home', {groups: grupos});
 });
 
