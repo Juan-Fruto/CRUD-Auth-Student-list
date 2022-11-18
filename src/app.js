@@ -6,6 +6,7 @@ import morgan from'morgan';
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 import './config/sesion.js';
 
 const app = express();
@@ -48,6 +49,8 @@ app.use(
   app.use(passport.session());
 
   app.use(express.static(path.join(__dirname, "public")));
+
+  app.use(cookieParser());
 
   // app.use(function(req, res, next) {
   //   res.status(404).render('error404', {noNavBar: true});

@@ -1,9 +1,15 @@
 import { Router} from 'express';
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
 import Stdn from '../models/Stdn';
 import Users from '../models/Users';
 import Group from '../models/Group';
-import jwt from 'jsonwebtoken';
+import tempEnvVars from '../config/tempEnvVars';
+import {serialize} from 'cookie';
+import {verifyController} from '../middlewares/tokens';
+import {logoutController} from '../middlewares/tokens';
+import 'cookie-parser';
+//import { Cookie } from 'express-session';
 //import isAuth from '../helpers/validateAuth';
 
 const router =  Router();
@@ -11,22 +17,57 @@ const router =  Router();
 //rutas de la interface de login
 
 router.get('/', function (req, res) {
-    console.log('req.params.status', req.params.status);
-    console.log('decodeURIComponent(req.params.status)', decodeURIComponent(req.params.status));
-    console.log('req.query.status', req.query.status);
-    console.log('tipo', typeof(req.query.status));
-    console.log('decodeURIComponent(req.query.status)', decodeURIComponent(req.query.status));
-    if(req.query.status){
-        res.render('login', {noNavBar: true, success: req.query.status});
-    }
+    // console.log('req.params.status', req.params.status);
+    // console.log('decodeURIComponent(req.params.status)', decodeURIComponent(req.params.status));
+    // console.log('req.query.status', req.query.status);
+    // console.log('tipo', typeof(req.query.status));
+    // console.log('decodeURIComponent(req.query.status)', decodeURIComponent(req.query.status));
+    // if(req.query.status){
+    //     res.render('login', {noNavBar: true, success: req.query.status});
+    // }
     res.render('login', {noNavBar: true});
 });
 
-router.post('/login', passport.authenticate('local', {
-    successRedirect: '/students/CRUD',
-    failureRedirect: '/',
-    failureFlash: false
-}));
+router.post('/login', async function (req, res){
+    const {username, password} = req.body;
+    const errors = [];
+    try {
+        const usernameFromMongo = await Users.findOne({username});
+        if(username.length == 0){
+            errors.push({text: 'Insert your username'});
+        }
+        if(password.length == 0){
+            errors.push({text: 'Insert your password'});
+        } else {
+            if(usernameFromMongo){
+                const matchPassword = await usernameFromMongo.matchPassword(password, usernameFromMongo.password);
+                if(!matchPassword){
+                    errors.push({text: 'Password incorrect'});
+                }
+            }    
+        }
+        if(!usernameFromMongo && username.length > 0){
+            errors.push({text: ('The username does not exist')});
+        }
+        if (errors.length > 0){
+            res.render('login', {errors: errors, noNavBar: true});
+        } else {
+            const token = jwt.sign({id: usernameFromMongo._id}, tempEnvVars.SECRET, {expiresIn: 60*60*24});
+            const serialized = serialize('tokenId', token, {
+                httpOnly: true,
+                secure: false, //true when it is on production: process.env.NODE_ENV == ‘production’,
+                sameSite: 'strict',
+                maxAge: 60*60*24,
+                path: '/'
+            });
+            //res.setHeader('Set-Cookie', serialized);
+            res.cookie('sesionToken', serialized);
+            res.redirect('/students/CRUD');
+        }
+    } catch (error) {
+        console.log(error);
+    }
+});
 
 //rutas de la interface de registro
 
@@ -41,17 +82,24 @@ router.post('/register', async function (req, res) {
         const user = new Users({names, lastName, group, username, password});
         user.password = await user.encryptPassword(password);
         const userSaved = await user.save();
-        console.log(userSaved);
-        const message = encodeURIComponent('Successful registration');
+        console.log('user saved as', userSaved);
 
-        res.redirect('/?status=' + message);
+        const token = jwt.sign({id: userSaved._id}, tempEnvVars.SECRET, {expiresIn: 60*60*24});
+        console.log(token);
+        
+        res.redirect('/');
     }
 
     async function usernameFromMongo(){
-        //change the query to findOne
-        const queryUsernames = await Users.find({username}, 'username').lean();
-        const userDB = queryUsernames[0].username;
-        return userDB;
+        try {
+            //change the query to findOne
+            const queryUsernames = await Users.find({username}, 'username').lean();
+            const userDB = queryUsernames[0].username;
+            return userDB;
+        } catch (error) {
+            //pass
+        }
+        
     }
 
     try{
@@ -82,19 +130,12 @@ router.post('/register', async function (req, res) {
             saveU();
         }
     } catch (error){
-        console.log(error.messages);
+        console.log('error: ', error);
     }
 });
 
 //rutas de la interface de CRUD
-router.get('/students/CRUD',
-    // function(req, res, next) {
-    // if(req.isAuthenticated()){
-    //     return next;
-    // }
-    // res.redirect('/');
-    // },
-    async function (req, res) {
+router.get('/students/CRUD', verifyController, async function (req, res) {
     //hay que agragar un $match al inicio pasandole el id proveniente de home
     const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
     for (let i = 0; i < query.length; i++) {
@@ -105,7 +146,7 @@ router.get('/students/CRUD',
     res.render('crud', {document: query});
 });
 
-router.post('/students/add', async function (req, res) {
+router.post('/students/add', verifyController,async function (req, res) {
     const errors = [];
     if (req.body.name == 0) {
         errors.push({text: 'Please insert a name'});
@@ -140,7 +181,7 @@ router.post('/students/add', async function (req, res) {
     }
 });
 
-router.get('/students/:id/delete', async function(req, res){
+router.get('/students/:id/delete', verifyController, async function(req, res){
     console.log(req.params.id);
     await Stdn.findByIdAndDelete(req.params.id);
     res.redirect('/students/CRUD');
@@ -148,7 +189,7 @@ router.get('/students/:id/delete', async function(req, res){
 
 //rutas de la interface de edit
 
-router.get('/students/:id/edit', async function(req, res){
+router.get('/students/:id/edit', verifyController, async function(req, res){
     try {
         let object = await Stdn.findById(req.params.id).lean();
         console.log(req.params.id);
@@ -160,7 +201,7 @@ router.get('/students/:id/edit', async function(req, res){
     }
 });
 
-router.post('/students/:id/edit', async function(req, res){
+router.post('/students/:id/edit', verifyController, async function(req, res){
     const errors = [];
     console.log(typeof req.body.status);
     console.log(req.body.status);
@@ -197,16 +238,16 @@ router.get('/about', function (req, res) {
 
 //rutas de la interface home
 
-router.get('/home', function (req, res) {
+router.get('/home', verifyController, function (req, res) {
 const grupos = ['5°B', '5°C', '5°D', '5°E', '5°F', '6°A', '6°B', '6°C', '6°D', '6°E', '7°A', '7°B', '7°C', '7°D', '7°E'];
     res.render('home', {groups: grupos});
 });
 
-router.get('/home/addGroup', function (req, res){
+router.get('/home/addGroup', verifyController, function (req, res){
     res.render('group');
 });
 
-router.post('/home/group/add', async function (req, res){
+router.post('/home/group/add', verifyController, async function (req, res){
     //actualizar en la coleccion original e insertar a la coleccion del usuario que guarde los grupos en home, hacer
     //validators para dicha funcion, verficar que no se repitan las clases
     async function saveG() {
@@ -233,5 +274,11 @@ router.post('/home/group/add', async function (req, res){
     const {subeject_grade, group, career} = req.body;
 
 });
+
+router.get('/recover', function (req, res) {
+    res.send('<body style="background-color: rgb(102, 153, 51)"><h1 style="text-align: center; margin: 20% 0%; color: white; font-size: 500px;">Coming Soon</h1></body>');
+});
+
+router.get('/logout', logoutController);
 
 export default router;
