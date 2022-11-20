@@ -1,5 +1,6 @@
 import express from 'express';
 import indexRoutes from './routes/index.routes';
+import * as dotenv from 'dotenv';
 import { engine } from 'express-handlebars';
 import path from 'path';
 import morgan from'morgan';
@@ -10,11 +11,12 @@ import cookieParser from 'cookie-parser';
 import './config/sesion.js';
 
 const app = express();
+dotenv.config();
 
 // settings
 
 app.set('hostname', '');
-app.set('port', 3000);
+app.set('port', process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 
 app.engine('.hbs', engine({

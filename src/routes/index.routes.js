@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import Stdn from '../models/Stdn';
 import Users from '../models/Users';
 import Group from '../models/Group';
-import tempEnvVars from '../config/tempEnvVars';
 import {serialize} from 'cookie';
 import { verify } from "jsonwebtoken";
 import {verifyController} from '../middlewares/tokens';
@@ -54,7 +53,7 @@ router.post('/login', async function (req, res){
         if (errors.length > 0){
             res.render('login', {errors: errors, noNavBar: true, login: true});
         } else {
-            const token = jwt.sign({id: usernameFromMongo._id}, tempEnvVars.SECRET, {expiresIn: 60*60*24});
+            const token = jwt.sign({id: usernameFromMongo._id}, process.env.SECRET, {expiresIn: 60*60*24});
             const serialized = serialize('tokenId', token, {
                 httpOnly: true,
                 secure: false, //true when it is on production: process.env.NODE_ENV == ‘production’,
@@ -86,7 +85,7 @@ router.post('/register', async function (req, res) {
         const userSaved = await user.save();
         console.log('user saved as', userSaved);
 
-        const token = jwt.sign({id: userSaved._id}, tempEnvVars.SECRET, {expiresIn: 60*60*24});
+        const token = jwt.sign({id: userSaved._id}, process.env.SECRET, {expiresIn: 60*60*24});
         console.log(token);
         
         res.redirect('/');
@@ -287,7 +286,7 @@ router.get('/profile', verifyController, async function (req, res){
 
     const userId = verify(
         cookie.parse(req.cookies.sesionToken).tokenId,
-        tempEnvVars.SECRET
+        process.env.SECRET
     ).id;
     const userData = await Users.findById(userId);
     const {names, lastName, username, password} = userData;
