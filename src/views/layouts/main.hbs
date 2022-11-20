@@ -10,13 +10,16 @@
     <title>Nodejs MongoDB CRUD</title>
 </head>
 <body>
+
+    {{!-- do not show the navigation bar --}}
     {{#if noNavBar}}
-        {{!-- do not show the navigation bar --}}
-        {{#if errors}}
-            <div class="container-sm">
-                {{> errorsMessage}}
-            </div>
-        {{/if}}    
+
+        {{#if login}}
+            {{> headerLog}}
+        {{/if}}        
+        {{#if register}}
+            {{> navbarReg}}
+        {{/if}}        
         
         <style type = "text/css">
             body
@@ -32,12 +35,13 @@
                 background-color: gainsboro;
             }
         </style> 
-        {{#if errors}}
-            <div class="container-sm">
-                {{> errorsMessage}}
-            </div>
-        {{/if}} 
         
+    {{/if}}
+
+    {{#if errors}}
+        <div class="container-sm">
+            {{> errorsMessage}}
+        </div>
     {{/if}}
 
     {{{ body }}} 

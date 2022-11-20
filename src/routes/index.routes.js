@@ -6,8 +6,10 @@ import Users from '../models/Users';
 import Group from '../models/Group';
 import tempEnvVars from '../config/tempEnvVars';
 import {serialize} from 'cookie';
+import { verify } from "jsonwebtoken";
 import {verifyController} from '../middlewares/tokens';
 import {logoutController} from '../middlewares/tokens';
+import cookie from 'cookie';
 import 'cookie-parser';
 //import { Cookie } from 'express-session';
 //import isAuth from '../helpers/validateAuth';
@@ -25,7 +27,7 @@ router.get('/', function (req, res) {
     // if(req.query.status){
     //     res.render('login', {noNavBar: true, success: req.query.status});
     // }
-    res.render('login', {noNavBar: true});
+    res.render('login', {noNavBar: true, login: true});
 });
 
 router.post('/login', async function (req, res){
@@ -50,7 +52,7 @@ router.post('/login', async function (req, res){
             errors.push({text: ('The username does not exist')});
         }
         if (errors.length > 0){
-            res.render('login', {errors: errors, noNavBar: true});
+            res.render('login', {errors: errors, noNavBar: true, login: true});
         } else {
             const token = jwt.sign({id: usernameFromMongo._id}, tempEnvVars.SECRET, {expiresIn: 60*60*24});
             const serialized = serialize('tokenId', token, {
@@ -72,7 +74,7 @@ router.post('/login', async function (req, res){
 //rutas de la interface de registro
 
 router.get('/register', function (req, res) {
-    res.render('register', {noNavBar: true});
+    res.render('register', {noNavBar: true, register: true});
 });
 
 router.post('/register', async function (req, res) {
@@ -121,6 +123,7 @@ router.post('/register', async function (req, res) {
             res.render('register', {
                 errors: errors,
                 noNavBar: true,
+                register: true,
                 names: names,
                 lastName: lastName,
                 group: group,
@@ -276,7 +279,25 @@ router.post('/home/group/add', verifyController, async function (req, res){
 });
 
 router.get('/recover', function (req, res) {
-    res.send('<body style="background-color: rgb(102, 153, 51)"><h1 style="text-align: center; margin: 20% 0%; color: white; font-size: 500px;">Coming Soon</h1></body>');
+    res.send('<body style="background-color: rgb(102, 153, 51)"><h1 style="text-align: center; margin: 20% 0%; color: white; font-size: 50px;">Coming Soon</h1></body>');
+});
+
+router.get('/profile', verifyController, async function (req, res){
+    console.log(cookie.parse(req.cookies.sesionToken));
+
+    const userId = verify(
+        cookie.parse(req.cookies.sesionToken).tokenId,
+        tempEnvVars.SECRET
+    ).id;
+    const userData = await Users.findById(userId);
+    const {names, lastName, username, password} = userData;
+    
+    res.render('profile', {
+        names,
+        lastName,
+        username,
+        password
+    });
 });
 
 router.get('/logout', logoutController);

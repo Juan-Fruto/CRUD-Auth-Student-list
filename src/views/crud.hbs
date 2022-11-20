@@ -1,40 +1,32 @@
 <link rel="stylesheet" href="../css/crud.css">
 
-<div>
-    <div>
-        <div>
-            <div>
-                <div class="">
-                    <h1 class="text-center mb-0 mt-5">CRUD page</h1>
 
-                    <form action="/students/add", method="POST">
-                        <hr/ class="mb-4 mt-1">
-                        <div class="row">
-                            <div class="col-md-5">
-                                <label for="title" class="form-label fw-bold">Writte the name:</label>
-                                <input type="text" class="form-control" name="name" id="name" placeholder="name">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="description" class="form-label fw-bold">Writte the grade:</label>
-                                <input type="number" class="form-control" step="0.1" name="grade" id="grade" placeholder="subject grade">
-                            </div>
-                            <div class="form-check form-switch col-md-2">
-                                <label for="status" class="form-label fw-bold">Select the status:</label><br/>
-                                <input type="checkbox" class="form-check-input" name="status" title="Select the student's academic status, whether regitered or deregistered">
-                                <span class="labels" data-on="registered" data-off="deregistered"></span>
-                            </div><br>
-                            <div class="d-grid gap-4 col-md-2 mx-auto">
-                                <div class="form-label"></div>
-                                <button class="btn btn-primary">Add</button>
-                            </div>
-                            <div class="col-md-12"></div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                
+<h1 class="text-center mb-0 mt-5">CRUD page</h1>
+
+<form action="/students/add", method="POST">
+    <hr/ class="mb-4 mt-1">
+    <div class="row">
+        <div class="col-md-5">
+            <label for="title" class="form-label fw-bold">Writte the name:</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="name">
         </div>
+        <div class="col-md-3">
+            <label for="description" class="form-label fw-bold">Writte the grade:</label>
+            <input type="number" class="form-control" step="0.1" name="grade" id="grade" placeholder="subject grade">
+        </div>
+        <div class="form-check form-switch col-md-2">
+            <label for="status" class="form-label fw-bold">Select the status:</label><br/>
+            <input type="checkbox" class="form-check-input" name="status" title="Select the student's academic status, whether regitered or deregistered">
+            <span class="labels" data-on="registered" data-off="deregistered"></span>
+        </div><br>
+        <div class="d-grid gap-4 col-md-2 mx-auto">
+            <div class="form-label"></div>
+            <button class="btn btn-primary">Add</button>
+        </div>
+        <div class="col-md-12"></div>
     </div>
-</div>
+</form>
 
 {{!-- table table-info table-bordered table-striped m-5 mt-0 mb-0 --}}
 
