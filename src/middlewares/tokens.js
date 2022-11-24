@@ -3,7 +3,7 @@ import cookie from 'cookie';
 import clearCookie from 'cookie-parser';
 import User from '../models/Users';
 
-function verifyController(req, res, next){
+export function verifyController(req, res, next){
     //const {tokenId} = cookies;
     try {
         console.log('cookie from crud:\n', cookie.parse(req.cookies.sesionToken).tokenId);
@@ -24,12 +24,12 @@ function verifyController(req, res, next){
     }
 } 
 
-function logoutController(req, res, next){
+export function logoutController(req, res, next){
     res.clearCookie('sesionToken');
     res.redirect('/');
 }
 
-module.exports = {
+export default {
     verifyController,
     logoutController
 };

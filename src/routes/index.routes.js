@@ -18,15 +18,18 @@ const router =  Router();
 //rutas de la interface de login
 
 router.get('/', function (req, res) {
-    // console.log('req.params.status', req.params.status);
-    // console.log('decodeURIComponent(req.params.status)', decodeURIComponent(req.params.status));
-    // console.log('req.query.status', req.query.status);
-    // console.log('tipo', typeof(req.query.status));
-    // console.log('decodeURIComponent(req.query.status)', decodeURIComponent(req.query.status));
-    // if(req.query.status){
-    //     res.render('login', {noNavBar: true, success: req.query.status});
-    // }
-    res.render('login', {noNavBar: true, login: true});
+    if(req.cookies.status){
+        if(req.cookies.status == 'success-account'){
+            res.clearCookie('status');
+            res.render('login', {
+                noNavBar: true,
+                login: true,
+                success: "The account has been successfully created"
+            });
+        }
+    } else {
+        res.render('login', {noNavBar: true, login: true});
+    }
 });
 
 router.post('/login', async function (req, res){
@@ -51,7 +54,7 @@ router.post('/login', async function (req, res){
             errors.push({text: ('The username does not exist')});
         }
         if (errors.length > 0){
-            res.render('login', {errors: errors, noNavBar: true, login: true});
+            res.render('login', {errors: errors, username,noNavBar: true, login: true});
         } else {
             const token = jwt.sign({id: usernameFromMongo._id}, process.env.SECRET, {expiresIn: 60*60*24});
             const serialized = serialize('tokenId', token, {
@@ -88,6 +91,8 @@ router.post('/register', async function (req, res) {
         const token = jwt.sign({id: userSaved._id}, process.env.SECRET, {expiresIn: 60*60*24});
         console.log(token);
         
+        // res.send({succes: "The account has been successfully created"});
+        res.cookie('status', 'success-account');
         res.redirect('/');
     }
 
@@ -145,7 +150,14 @@ router.get('/students/CRUD', verifyController, async function (req, res) {
             query[i].grade = "--";
         }
       }
-    res.render('crud', {document: query});
+    if(req.cookies.status){
+        if(req.cookies.status == 'success-student'){
+            res.clearCookie('status')
+            res.render('crud', {document: query, success: "the student has successfully added to the list"});
+        }
+    } else{
+        res.render('crud', {document: query});
+    }
 });
 
 router.post('/students/add', verifyController,async function (req, res) {
@@ -176,6 +188,7 @@ router.post('/students/add', verifyController,async function (req, res) {
             const stdn = Stdn(req.body);
             const stdnSaved = await stdn.save();
             console.log(stdnSaved);
+            res.cookie('status', 'success-student');
             res.redirect('/students/CRUD');
         } catch (error){
             console.log(error);

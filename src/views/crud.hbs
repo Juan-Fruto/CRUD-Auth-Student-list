@@ -32,14 +32,15 @@
 
 <div class="container-md">
         <table class="table table-md table-info table-striped mt-0">
+            <caption class="visually-hidden">student list</caption>
             <thead>
                 <tr class="table-dark">
-                    <td class="td-name">Name</td>
-                    <td class="td-grade">Subject grade</td>
-                    <td class="td-status">Status</td>
-                    <td class="td-actions-1">Actions</td>
-                    <td class="td-actions-2"></td>
-                    <td class="td-actions-3"></td>
+                    <th class="td-name" scope="col">Name</th>
+                    <th class="td-grade" scope="col">Subject grade</th>
+                    <th class="td-status" scope="col">Status</th>
+                    <th class="td-actions-1" scope="col">Actions</th>
+                    <th class="td-actions-2" scope="col"></th>
+                    <th class="td-actions-3" scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -60,7 +61,7 @@
                         <td class="status"></td>
                     {{else}}
                         <td class= "status">
-                            <button class="btn-status" title="this student is de-registered"></button>
+                            <button role="complementary" class="btn-status" title="this student is de-registered"></button>
                         </td>
                     {{/if}}
                 </tr>

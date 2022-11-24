@@ -27,6 +27,10 @@ form {
     margin: -120px 100px;
 }
 
+th {
+    font-weight: normal;
+}
+
 .container-md {
     width: 960px;
     height: 500px;
