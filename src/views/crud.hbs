@@ -149,7 +149,7 @@
                 {{#each document}}
                 <tr>
                     <td>{{name}}</td>
-                    <td>{{subeject_grade}}</td>
+                    <td>{{grade}}</td>
                     <td>
                         {{#if status}}
                             registered
@@ -157,8 +157,8 @@
                             de-registered
                         {{/if}}
                     </td>
-                    <td><a href="/students/{{_id}}/edit" class="edit">Edit</a></td>
-                    <td><a href="/students/{{_id}}/delete" class="delete" onclick="return confirm('Are you sure to delete {{name}} from the list?');">Delete</a></td><br>
+                    <td><a href="/{{groupName}}/students/{{_id}}/edit" class="edit">Edit</a></td>
+                    <td><a href="/{{groupName}}/students/{{_id}}/delete" class="delete" onclick="return confirm('Are you sure to delete {{name}} from the list?');">Delete</a></td><br>
                     {{#if status}}
                         <td class="status"></td>
                     {{else}}

@@ -10,6 +10,7 @@ import {verifyController} from '../middlewares/tokens';
 import {logoutController} from '../middlewares/tokens';
 import cookie from 'cookie';
 import 'cookie-parser';
+import { Schema } from 'mongoose';
 //import { Cookie } from 'express-session';
 //import isAuth from '../helpers/validateAuth';
 
@@ -147,28 +148,33 @@ router.get('/:groupName/students/CRUD', verifyController, async function (req, r
     console.log('parametro', req.params.groupName.charAt(0));
     console.log('parametro', req.params.groupName.charAt(2));
     console.log('parametro', req.params.groupName.substr(3));
-    const query = await Group.aggregate([
+    //console.log('llegó aqui?');
+    let query = await Group.aggregate([
         {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
         {$unwind: '$students'},
-        {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}},
+        {$project: {_id: "$students._id", name: '$students.name', grade: '$students.subeject_grade',  status: '$students.status'}},
         {$sort: {name: 1}}
     ]);
+    query.forEach(element => element.groupName = req.params.groupName);
+    //query.groupName = req.params.groupName;
     for (let i = 0; i < query.length; i++) {
         if (query[i].grade == null){
             query[i].grade = "--";
         }
-      }
+    }
     if(req.cookies.status){
         if(req.cookies.status == 'success-student'){
             res.clearCookie('status')
-            res.render('crud', {document: query, success: "the student has successfully added to the list"});
+            res.render('crud', {document: query, groupName: req.params.groupName, success: "the student has successfully added to the list"});
         }
     } else{
+        console.log('document', query);
         res.render('crud', {document: query, groupName: req.params.groupName});
     }
 });
 
 router.post('/:groupName/students/add', verifyController,async function (req, res) {
+    console.log('parrrrrammmmetrossssss', req.body);
     const errors = [];
     if (req.body.name == 0) {
         errors.push({text: 'Please insert a name'});
@@ -181,13 +187,13 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
     }
     if (errors.length > 0){
         try {
-            const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
+            const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.subeject_grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
             for (let i = 0; i < query.length; i++) {
                 if (query[i].grade == null){
                     query[i].grade = "--";
                 }
             }
-            res.render('crud', {document: query, errors});
+            res.render('crud', {document: query, groupName: req.params.groupName,errors});
         } catch (error) {
             console.log(error.message);
         }
@@ -209,7 +215,7 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
                     subeject_grade: req.body.subeject_grade,
                     status: req.body.status
                 }}}
-            ) 
+            );
 
             // await Group.findByIdAndUpdate(
             //     {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
@@ -220,14 +226,16 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
             //     }}}
             // )
             res.cookie('status', 'success-student');
-            res.redirect('/students/CRUD');
+            const route = '/' + req.params.groupName + '/students/CRUD';
+            console.log(route);
+            res.redirect(route);
         } catch (error){
             console.log(error);
         }
     }
 });
 
-router.get('/:groupNanme/students/:id/delete', verifyController, async function(req, res){
+router.get('/:groupName/students/:id/delete', verifyController, async function(req, res){
     console.log(req.params.id);
     await Stdn.findByIdAndDelete(req.params.id);
     res.redirect('/students/CRUD');
@@ -235,10 +243,17 @@ router.get('/:groupNanme/students/:id/delete', verifyController, async function(
 
 //rutas de la interface de edit
 
-router.get('/:groupNanme/students/:id/edit', verifyController, async function(req, res){
+router.get('/:groupName/students/:id/edit', verifyController, async function(req, res){
     try {
-        let object = await Stdn.findById(req.params.id).lean();
-        console.log(req.params.id);
+        const stdnId = Mongoose.Types.ObjectId(req.params.id);
+        let object = await Group.aggregate([
+            {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
+            {$unwind: '$students'},
+            {$match: {_id: stdnId}},
+            {$project: {_id: "$students._id", name: "$students.name", subeject_grade: "$students.subeject_grade"}}
+        ]);
+        //object.lean();
+        console.log('objjjetooo-', object);
         console.log(typeof object.status, object.status);
 
         res.render('edit', {object});

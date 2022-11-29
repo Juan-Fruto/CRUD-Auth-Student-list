@@ -11,6 +11,7 @@ export function verifyController(req, res, next){
         console.log(personalData.id);
         //funcion para comprobar el id en la bd, y hacer un logoutController para log out
         const userFromMongo = User.findById(personalData.id);
+        console.log('llegó aqui?');
         if(userFromMongo){
             next();
         } else{
