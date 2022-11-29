@@ -66,7 +66,7 @@ router.post('/login', async function (req, res){
             });
             //res.setHeader('Set-Cookie', serialized);
             res.cookie('sesionToken', serialized);
-            res.redirect('/students/CRUD');
+            res.redirect('/home');
         }
     } catch (error) {
         console.log(error);
@@ -142,9 +142,17 @@ router.post('/register', async function (req, res) {
 });
 
 //rutas de la interface de CRUD
-router.get('/students/CRUD', verifyController, async function (req, res) {
+router.get('/:groupName/students/CRUD', verifyController, async function (req, res) {
     //hay que agragar un $match al inicio pasandole el id proveniente de home
-    const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
+    console.log('parametro', req.params.groupName.charAt(0));
+    console.log('parametro', req.params.groupName.charAt(2));
+    console.log('parametro', req.params.groupName.substr(3));
+    const query = await Group.aggregate([
+        {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
+        {$unwind: '$students'},
+        {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}},
+        {$sort: {name: 1}}
+    ]);
     for (let i = 0; i < query.length; i++) {
         if (query[i].grade == null){
             query[i].grade = "--";
@@ -156,11 +164,11 @@ router.get('/students/CRUD', verifyController, async function (req, res) {
             res.render('crud', {document: query, success: "the student has successfully added to the list"});
         }
     } else{
-        res.render('crud', {document: query});
+        res.render('crud', {document: query, groupName: req.params.groupName});
     }
 });
 
-router.post('/students/add', verifyController,async function (req, res) {
+router.post('/:groupName/students/add', verifyController,async function (req, res) {
     const errors = [];
     if (req.body.name == 0) {
         errors.push({text: 'Please insert a name'});
@@ -190,10 +198,27 @@ router.post('/students/add', verifyController,async function (req, res) {
             } else{
                 req.body.status = false;
             }
-            const stdn = Stdn(req.body);
-            console.log('request body', req.body);
-            const stdnSaved = await stdn.save();
-            console.log(stdnSaved);
+            // const stdn = Stdn(req.body);
+            // console.log('request body', req.body);
+            // const stdnSaved = await stdn.save();
+
+            await Group.updateOne(
+                {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)},
+                {$push: {students: {
+                    name: req.body.name,
+                    subeject_grade: req.body.subeject_grade,
+                    status: req.body.status
+                }}}
+            ) 
+
+            // await Group.findByIdAndUpdate(
+            //     {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
+            //     {$push: {students: {
+            //         name: req.body.name,
+            //         subeject_grade: req.body.subeject_grade,
+            //         status: req.body.status
+            //     }}}
+            // )
             res.cookie('status', 'success-student');
             res.redirect('/students/CRUD');
         } catch (error){
@@ -202,7 +227,7 @@ router.post('/students/add', verifyController,async function (req, res) {
     }
 });
 
-router.get('/students/:id/delete', verifyController, async function(req, res){
+router.get('/:groupNanme/students/:id/delete', verifyController, async function(req, res){
     console.log(req.params.id);
     await Stdn.findByIdAndDelete(req.params.id);
     res.redirect('/students/CRUD');
@@ -210,7 +235,7 @@ router.get('/students/:id/delete', verifyController, async function(req, res){
 
 //rutas de la interface de edit
 
-router.get('/students/:id/edit', verifyController, async function(req, res){
+router.get('/:groupNanme/students/:id/edit', verifyController, async function(req, res){
     try {
         let object = await Stdn.findById(req.params.id).lean();
         console.log(req.params.id);
@@ -222,7 +247,7 @@ router.get('/students/:id/edit', verifyController, async function(req, res){
     }
 });
 
-router.post('/students/:id/edit', verifyController, async function(req, res){
+router.post('/:groupNanme/students/:id/edit', verifyController, async function(req, res){
     const errors = [];
     console.log(typeof req.body.status);
     console.log(req.body.status);
@@ -261,14 +286,17 @@ router.get('/about', function (req, res) {
 
 router.get('/home', verifyController, async function (req, res) {
     const userId = verify(cookie.parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
+
     const query = await Users.findOne({_id: userId}, 'groups');
     console.log('-----groups:', query.groups);
+
     const arrayOfGroups = [];
     query.groups.forEach(async function (groupId){
         const atributtesOfGroup = await Group.findById(groupId);
         const {grade, group, career} = atributtesOfGroup;
         arrayOfGroups.push(grade + '°' + group + '\n' + career);
     });
+
     res.render('home', {groups: arrayOfGroups, userId: userId});
 });
 
@@ -280,36 +308,42 @@ router.get('/home/group/:id', verifyController, function (req, res){
 router.post('/home/group/:id/add', verifyController, async function (req, res){
     //actualizar en la coleccion original e insertar a la coleccion del usuario que guarde los grupos en home, hacer
     //validators para dicha funcion, verficar que no se repitan las clases
+    const {grade, group, career} = req.body;
+
+    let groupId = await Group.findOne({grade: grade, group: group, career: career}, '_id');
+    groupId = groupId._id.valueOf();
+
+    const existingGroups = await Users.findById(req.params.id, 'groups');
+    //console.log(existingGroups.groups);
+    
     async function saveG() {
-        const {grade, group, career} = req.body;
-        let groupId = await Group.findOne({grade: grade, group: group, career: career}, '_id');
-        groupId = groupId._id.valueOf();
-        console.log('group id', groupId);
-        console.log('user id', req.params.id);
         const groupSaved = await Users.findByIdAndUpdate(req.params.id, {$push: {groups: groupId}});
         groupSaved.save();
+
         res.redirect('/home');
     }
     try {
         const errors = [];
-        if (!req.body.grade) {
+        if (!grade) {
             errors.push({text: "Insert the grade"});
         }
-        if (!req.body.group) {
+        if (!group) {
             errors.push({text: "Insert the grade"});
         }
-        if (!req.body.career) {
+        if (!career) {
             errors.push({text: "Insert the career"});
         }
+        if(existingGroups.groups.includes(groupId)){
+            errors.push({text: "you have already added"});
+        }
         if (errors.length > 0) {
-            res.render('group', {errors, grade, group, career});
+            res.render('group', {errors, grade, group, career, userId: req.params.id});
         } else {
             saveG();
         }
     } catch (error) {
 
     }
-    const {grade, group, career} = req.body;
 
 });
 
