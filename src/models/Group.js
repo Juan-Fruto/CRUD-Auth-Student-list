@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 const groupSchema = new Schema(
     {
-        subeject_grade: {
+        grade: {
             type: String,
             required: true,
             unique: false
@@ -22,10 +22,10 @@ const groupSchema = new Schema(
                 name: {
                     type: String,
                     required: true,
-                    unique: true,
+                    unique: false,
                     trim: true
                 },
-                grade: {
+                subeject_grade: {
                     type: Number,
                     required: false
                 },

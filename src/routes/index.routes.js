@@ -80,10 +80,10 @@ router.get('/register', function (req, res) {
 });
 
 router.post('/register', async function (req, res) {
-    const {names, lastName, group, username, password, confirmPassword} = req.body;
+    const {names, lastName, email, username, password, confirmPassword} = req.body;
 
     async function saveU(){
-        const user = new Users({names, lastName, group, username, password});
+        const user = new Users({names, lastName, email, username, password});
         user.password = await user.encryptPassword(password);
         const userSaved = await user.save();
         console.log('user saved as', userSaved);
@@ -130,7 +130,7 @@ router.post('/register', async function (req, res) {
                 register: true,
                 names: names,
                 lastName: lastName,
-                group: group,
+                email: email,
                 username: username
             });
         } else {
@@ -168,12 +168,17 @@ router.post('/students/add', verifyController,async function (req, res) {
     /*if (req.body.grade.length == 0){
         errors.push({text: 'Please insert a grade'});
     }*/
-    if (req.body.grade < 0 || req.body.grade > 10) {
+    if (req.body.subeject_grade < 0 || req.body.subeject_grade > 10) {
         errors.push({text: 'Grade must be between 0 and 10'});
     }
     if (errors.length > 0){
         try {
-            const query = await Stdn.find().lean();
+            const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
+            for (let i = 0; i < query.length; i++) {
+                if (query[i].grade == null){
+                    query[i].grade = "--";
+                }
+            }
             res.render('crud', {document: query, errors});
         } catch (error) {
             console.log(error.message);
@@ -186,6 +191,7 @@ router.post('/students/add', verifyController,async function (req, res) {
                 req.body.status = false;
             }
             const stdn = Stdn(req.body);
+            console.log('request body', req.body);
             const stdnSaved = await stdn.save();
             console.log(stdnSaved);
             res.cookie('status', 'success-student');
@@ -253,40 +259,57 @@ router.get('/about', function (req, res) {
 
 //rutas de la interface home
 
-router.get('/home', verifyController, function (req, res) {
-const grupos = ['5°B', '5°C', '5°D', '5°E', '5°F', '6°A', '6°B', '6°C', '6°D', '6°E', '7°A', '7°B', '7°C', '7°D', '7°E'];
-    res.render('home', {groups: grupos});
+router.get('/home', verifyController, async function (req, res) {
+    const userId = verify(cookie.parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
+    const query = await Users.findOne({_id: userId}, 'groups');
+    console.log('-----groups:', query.groups);
+    const arrayOfGroups = [];
+    query.groups.forEach(async function (groupId){
+        const atributtesOfGroup = await Group.findById(groupId);
+        const {grade, group, career} = atributtesOfGroup;
+        arrayOfGroups.push(grade + '°' + group + '\n' + career);
+    });
+    res.render('home', {groups: arrayOfGroups, userId: userId});
 });
 
-router.get('/home/addGroup', verifyController, function (req, res){
-    res.render('group');
+router.get('/home/group/:id', verifyController, function (req, res){
+    const userId = req.params.id;
+    res.render('group', {userId: userId});
 });
 
-router.post('/home/group/add', verifyController, async function (req, res){
+router.post('/home/group/:id/add', verifyController, async function (req, res){
     //actualizar en la coleccion original e insertar a la coleccion del usuario que guarde los grupos en home, hacer
     //validators para dicha funcion, verficar que no se repitan las clases
     async function saveG() {
-        const group = new Group(req.body);
-        const groupSaved = await group.save();
+        const {grade, group, career} = req.body;
+        let groupId = await Group.findOne({grade: grade, group: group, career: career}, '_id');
+        groupId = groupId._id.valueOf();
+        console.log('group id', groupId);
+        console.log('user id', req.params.id);
+        const groupSaved = await Users.findByIdAndUpdate(req.params.id, {$push: {groups: groupId}});
+        groupSaved.save();
         res.redirect('/home');
     }
     try {
         const errors = [];
-        if (!req.body.subeject_grade) {
+        if (!req.body.grade) {
+            errors.push({text: "Insert the grade"});
+        }
+        if (!req.body.group) {
             errors.push({text: "Insert the grade"});
         }
         if (!req.body.career) {
             errors.push({text: "Insert the career"});
         }
         if (errors.length > 0) {
-            res.render('group', {errors, subeject_grade, group, career});
+            res.render('group', {errors, grade, group, career});
         } else {
             saveG();
         }
     } catch (error) {
 
     }
-    const {subeject_grade, group, career} = req.body;
+    const {grade, group, career} = req.body;
 
 });
 
@@ -302,11 +325,12 @@ router.get('/profile', verifyController, async function (req, res){
         process.env.SECRET
     ).id;
     const userData = await Users.findById(userId);
-    const {names, lastName, username, password} = userData;
+    const {names, lastName, email, username, password} = userData;
     
     res.render('profile', {
         names,
         lastName,
+        email,
         username,
         password
     });

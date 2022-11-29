@@ -16,7 +16,6 @@ export function verifyController(req, res, next){
         } else{
             res.redirect('/');
         }
-        //next();
 
     } catch (error) {
         console.log(error);

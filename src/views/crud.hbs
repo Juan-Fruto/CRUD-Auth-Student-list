@@ -8,12 +8,12 @@
     <hr/ class="mb-4 mt-1">
     <div class="row">
         <div class="col-md-5">
-            <label for="title" class="form-label fw-bold">Writte the name:</label>
+            <label for="name" class="form-label fw-bold">Writte the name:</label>
             <input type="text" class="form-control" name="name" id="name" placeholder="name">
         </div>
         <div class="col-md-3">
-            <label for="description" class="form-label fw-bold">Writte the grade:</label>
-            <input type="number" class="form-control" step="0.1" name="grade" id="grade" placeholder="subject grade">
+            <label for="subeject_grade" class="form-label fw-bold">Writte the grade:</label>
+            <input type="number" class="form-control" step="0.1" name="subeject_grade" id="grade" placeholder="subject grade">
         </div>
         <div class="form-check form-switch col-md-2">
             <label for="status" class="form-label fw-bold">Select the status:</label><br/>
@@ -47,7 +47,7 @@
                 {{#each document}}
                 <tr>
                     <td>{{name}}</td>
-                    <td>{{grade}}</td>
+                    <td>{{subeject_grade}}</td>
                     <td>
                         {{#if status}}
                             registered

@@ -8,11 +8,11 @@
     <div class="row">
         {{#each groups}}
         <div class="col-md-1">
-            <button class="group">{{this}}</button>
+            <a href="/list/{{this}}"><button class="group">{{this}}</button></a>
         </div>
         {{/each}}
 
-        <form action="/home/addGroup" method="get" class="col-md-1 p-0">
+        <form action="/home/group/{{userId}}" method="get" class="col-md-1 p-0">
         <button class="add p-4">
             <img src="../images/add_dark.png" role="button" alt="add" title="add" class="group">
         </button>

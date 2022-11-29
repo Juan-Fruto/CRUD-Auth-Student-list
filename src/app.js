@@ -6,12 +6,14 @@ import path from 'path';
 import morgan from'morgan';
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import {createGroups} from './libs/setup.js';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import './config/sesion.js';
 
 const app = express();
 dotenv.config();
+createGroups();
 
 // settings
 

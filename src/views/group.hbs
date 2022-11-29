@@ -9,22 +9,22 @@
             <div class="card card-body p-4 border-3" style="color: black; background-color: rgb(228, 228, 228); border: none;">
                 <div class="mt-2 mb-2 me-5 ms-5">
                     <h1 class="text-center">Add Group</h1><br>
-                    <form class="row g-4" action="/home/group/add" method="POST">
+                    <form class="row g-4" action="/home/group/{{userId}}/add" method="POST">
                         <div class="col-md-2">
-                            <label for="subeject_grade">Grade: </label>
+                            <label for="grade">Grade: </label>
                         </div>
                         <div class="col-md-10">
-                            <select name="subeject_grade" id="subeject_grade" class="form-select">
+                            <select name="grade" id="grade" class="form-select">
                                 <option selected disabled>Open to select the grade</option>
-                                <option value="1">1°</option>
-                                <option value="2">2°</option>
-                                <option value="3">3°</option>
-                                <option value="4">4°</option>
-                                <option value="5">5°</option>
-                                <option value="6">6°</option>
-                                <option value="7">7°</option>
-                                <option value="8">8°</option>
-                                <option value="9">9°</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -34,9 +34,8 @@
                             <select name="group" id="group" class="form-select">
                                 <option selected disabled>Open to select the group</option>
                                 <option value="A">A</option>
-                                <option value="A">B</option>
-                                <option value="A">C</option>
-                                <option value="A">D</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
                             </select>
                         </div>
                         <div class="col-md-2">

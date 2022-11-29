@@ -1,6 +1,8 @@
 import {Schema, model, models} from 'mongoose';
 import brcypt from 'bcryptjs'
 
+//el usuario tambien tiene las llaves foraneas de los grupos
+
 const usersSchema = new Schema(
     {
         names: {
@@ -15,10 +17,10 @@ const usersSchema = new Schema(
             unique: false,
             trim: false
         },
-        group: {
+        email: {
             type: String,
             required: false,
-            unique: false,
+            unique: true,
             trim: true
         },
         username: {
@@ -32,7 +34,14 @@ const usersSchema = new Schema(
             required: true,
             unique: false,
             trim: false 
-        }
+        },
+        groups: []
+        // [
+        //     {
+        //         ref: 'Group',
+        //         type: Schema.Types.ObjectId
+        //     }
+        // ]
     }
 );
 

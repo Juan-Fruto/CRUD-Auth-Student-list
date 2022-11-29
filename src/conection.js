@@ -13,7 +13,7 @@ import {connect} from"mongoose";
 
 (async function(){
  try{
-    const db = await connect("mongodb://localhost/crud-mongo");
+    const db = await connect(process.env.MONGODB_URI_LOCAL);
     console.log("DB connected to",db.connection.name);
   } catch (error){
     console.error(error)

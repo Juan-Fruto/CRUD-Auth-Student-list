@@ -16,32 +16,15 @@
         <div class ="col-md-1"></div>
 
          <div class="col-md-3">
-            <label for="validationCustom04" class="form-label" for="group">Group you teach</label>
-            <select class="form-select" name="group" id="group">
-                <option class="placeholder" selected disabled>Open this select menu</option>
-                {{!-- {{#if group}}
-                    <option value="5°B" selected>5°B</option>
-                {{else}}
-                    <option value="5°B">5°B</option>    
-                {{/if}} --}}
-                    <option value="1°A">1°A</option>
-                    <option value="1°B">1°B</option>
-                    <option value="2°A">2°A</option>
-                    <option value="2°B">2°B</option>
-                    <option value="3°A">3°A</option>
-                    <option value="3°B">3°B</option>
-                    <option value="4°A">4°A</option>
-                    <option value="4°B">4°B</option>
-                    <option value="5°B">5°B</option>
-                    <option value="5°D">5°D</option>
-            </select>
+            <label for="validationCustom04" class="form-label" for="email">Email</label>
+            <input type="email" class="form-control" name="email" value="{{email}}">
         </div>
 
         <div class="col-md-3">
             <label for="validationCustomUsername" class="form-label" for="username">Username</label>
             <div class="input-group has-validation">
-            <span class="input-group-text" id="inputGroupPrepend">#</span>
-            <input type="text" class="form-control" name="username" id="username" value="{{username}}" placeholder="ucol email-without @ or account number">
+                <span class="input-group-text" id="inputGroupPrepend">#</span>
+                <input type="text" class="form-control" name="username" id="username" value="{{username}}" placeholder="account number">
             </div>
         </div>
 
