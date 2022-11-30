@@ -1,8 +1,6 @@
-"use strict";
+const preferedColorScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const switchTheme = document.getElementById('themeApp');
 
-var preferedColorScheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-var switchTheme = document.getElementById('themeApp');
-
-function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+function setTheme (theme) {
+    document.documentElement.setAttribute('data-theme', theme);
 }

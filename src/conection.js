@@ -13,7 +13,7 @@ import {connect} from"mongoose";
 
 (async function(){
  try{
-    const db = await connect(process.env.MONGODB_URI_LOCAL);
+    const db = await connect(process.env.MONGODB_URI_CLOUD);
     console.log("DB connected to",db.connection.name);
   } catch (error){
     console.error(error)

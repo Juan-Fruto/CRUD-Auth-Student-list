@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -14,8 +16,6 @@ var _cookie = _interopRequireDefault(require("cookie"));
 var _cookieParser = _interopRequireDefault(require("cookie-parser"));
 
 var _Users = _interopRequireDefault(require("../models/Users"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function verifyController(req, res, next) {
   //const {tokenId} = cookies;
