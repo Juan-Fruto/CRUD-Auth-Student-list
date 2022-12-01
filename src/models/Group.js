@@ -25,7 +25,7 @@ const groupSchema = new Schema(
                     unique: false,
                     trim: true
                 },
-                subeject_grade: {
+                subject_grade: {
                     type: Number,
                     required: false
                 },

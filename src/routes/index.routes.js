@@ -11,6 +11,7 @@ import {logoutController} from '../middlewares/tokens';
 import cookie from 'cookie';
 import 'cookie-parser';
 import { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 //import { Cookie } from 'express-session';
 //import isAuth from '../helpers/validateAuth';
 
@@ -152,7 +153,7 @@ router.get('/:groupName/students/CRUD', verifyController, async function (req, r
     let query = await Group.aggregate([
         {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
         {$unwind: '$students'},
-        {$project: {_id: "$students._id", name: '$students.name', grade: '$students.subeject_grade',  status: '$students.status'}},
+        {$project: {_id: "$students._id", name: '$students.name', grade: '$students.subject_grade',  status: '$students.status'}},
         {$sort: {name: 1}}
     ]);
     query.forEach(element => element.groupName = req.params.groupName);
@@ -204,27 +205,15 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
             } else{
                 req.body.status = false;
             }
-            // const stdn = Stdn(req.body);
-            // console.log('request body', req.body);
-            // const stdnSaved = await stdn.save();
 
             await Group.updateOne(
                 {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)},
                 {$push: {students: {
                     name: req.body.name,
-                    subeject_grade: req.body.subeject_grade,
+                    subject_grade: req.body.subeject_grade,
                     status: req.body.status
                 }}}
             );
-
-            // await Group.findByIdAndUpdate(
-            //     {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
-            //     {$push: {students: {
-            //         name: req.body.name,
-            //         subeject_grade: req.body.subeject_grade,
-            //         status: req.body.status
-            //     }}}
-            // )
             res.cookie('status', 'success-student');
             const route = '/' + req.params.groupName + '/students/CRUD';
             console.log(route);
@@ -245,31 +234,32 @@ router.get('/:groupName/students/:id/delete', verifyController, async function(r
 
 router.get('/:groupName/students/:id/edit', verifyController, async function(req, res){
     try {
-        const stdnId = Mongoose.Types.ObjectId(req.params.id);
+        //const stdnId = req.params.id;
+        const stdnId = mongoose.Types.ObjectId(req.params.id);
         let object = await Group.aggregate([
             {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
             {$unwind: '$students'},
-            {$match: {_id: stdnId}},
-            {$project: {_id: "$students._id", name: "$students.name", subeject_grade: "$students.subeject_grade"}}
+            {$match: {"students._id": stdnId}},
+            {$project: {_id: "$students._id", name: "$students.name", subject_grade: "$students.subject_grade", status: "$students.status"}}
         ]);
-        //object.lean();
+        object = object[0];
         console.log('objjjetooo-', object);
         console.log(typeof object.status, object.status);
 
-        res.render('edit', {object});
+        res.render('edit', {object, groupName: req.params.groupName});
     } catch (error) {
         console.log(error.message);
     }
 });
 
-router.post('/:groupNanme/students/:id/edit', verifyController, async function(req, res){
+router.post('/:groupName/students/:id/edit', verifyController, async function(req, res){
     const errors = [];
     console.log(typeof req.body.status);
     console.log(req.body.status);
     if (req.body.name.length == 0) {
         errors.push({text: 'Please insert a name'});
     }
-    if (req.body.grade < 0 || req.body.grade > 10) {
+    if (req.body.subject_grade < 0 || req.body.grade > 10) {
         errors.push({text: 'Grade must be between 0 and 10'});
     }
     if(req.body.status == 'on' || req.body.status == 'true' || req.body.status == 'True' || req.body.status == true){
@@ -286,7 +276,15 @@ router.post('/:groupNanme/students/:id/edit', verifyController, async function(r
         }
     } else {
         console.log(req.params.id);
-        await Stdn.findByIdAndUpdate(req.params.id, req.body);
+        const stdnId = mongoose.Types.ObjectId(req.params.id);
+        await Group.updateOne(
+            {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3), "students._id": stdnId},
+            {$set: {students: {
+                name: req.body.name,
+                subject_grade: req.body.subject_grade,
+                status: req.body.status
+            }}}
+        );
         res.redirect('/students/CRUD');
     }
 });
