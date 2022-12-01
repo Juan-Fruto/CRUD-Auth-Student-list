@@ -19,5 +19,5 @@ and also you need to have nodejs and npm in your computer, here´s a tutorial an
 * https://radixweb.com/blog/installing-npm-and-nodejs-on-windows-and-mac
 * https://nodejs.org/en/
 
-once you´re done with the previous steps open the terminal on the directory of the project and run: npm install
+once you´re done with the previous steps open the terminal on the directory of the project and run: npm install.
 then open your browser and go to localhost:3000 
