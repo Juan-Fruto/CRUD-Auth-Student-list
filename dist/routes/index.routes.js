@@ -33,7 +33,7 @@ var _tokens = require("../middlewares/tokens");
 
 require("cookie-parser");
 
-var _mongoose = require("mongoose");
+var _mongoose = _interopRequireWildcard(require("mongoose"));
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -360,7 +360,7 @@ router.get('/:groupName/students/CRUD', _tokens.verifyController, /*#__PURE__*/f
               $project: {
                 _id: "$students._id",
                 name: '$students.name',
-                grade: '$students.subeject_grade',
+                grade: '$students.subject_grade',
                 status: '$students.status'
               }
             }, {
@@ -437,18 +437,25 @@ router.post('/:groupName/students/add', _tokens.verifyController, /*#__PURE__*/f
             }
 
             if (!(errors.length > 0)) {
-              _context6.next = 18;
+              _context6.next = 19;
               break;
             }
 
             _context6.prev = 5;
             _context6.next = 8;
             return _Group["default"].aggregate([{
+              $match: {
+                grade: req.params.groupName.charAt(0),
+                group: req.params.groupName.charAt(2),
+                career: req.params.groupName.substr(3)
+              }
+            }, {
               $unwind: '$students'
             }, {
               $project: {
+                _id: "$students._id",
                 name: '$students.name',
-                grade: '$students.subeject_grade',
+                grade: '$students.subject_grade',
                 status: '$students.status'
               }
             }, {
@@ -459,6 +466,9 @@ router.post('/:groupName/students/add', _tokens.verifyController, /*#__PURE__*/f
 
           case 8:
             query = _context6.sent;
+            query.forEach(function (element) {
+              return element.groupName = req.params.groupName;
+            });
 
             for (i = 0; i < query.length; i++) {
               if (query[i].grade == null) {
@@ -469,33 +479,31 @@ router.post('/:groupName/students/add', _tokens.verifyController, /*#__PURE__*/f
             res.render('crud', {
               document: query,
               groupName: req.params.groupName,
-              errors: errors
+              errors: errors,
+              object: req.body
             });
-            _context6.next = 16;
+            _context6.next = 17;
             break;
 
-          case 13:
-            _context6.prev = 13;
+          case 14:
+            _context6.prev = 14;
             _context6.t0 = _context6["catch"](5);
             console.log(_context6.t0.message);
 
-          case 16:
-            _context6.next = 31;
+          case 17:
+            _context6.next = 32;
             break;
 
-          case 18:
-            _context6.prev = 18;
+          case 19:
+            _context6.prev = 19;
 
             if (req.body.status == 'on') {
               req.body.status = true;
             } else {
               req.body.status = false;
-            } // const stdn = Stdn(req.body);
-            // console.log('request body', req.body);
-            // const stdnSaved = await stdn.save();
+            }
 
-
-            _context6.next = 22;
+            _context6.next = 23;
             return _Group["default"].updateOne({
               grade: req.params.groupName.charAt(0),
               group: req.params.groupName.charAt(2),
@@ -504,39 +512,31 @@ router.post('/:groupName/students/add', _tokens.verifyController, /*#__PURE__*/f
               $push: {
                 students: {
                   name: req.body.name,
-                  subeject_grade: req.body.subeject_grade,
+                  subject_grade: req.body.subeject_grade,
                   status: req.body.status
                 }
               }
             });
 
-          case 22:
-            // await Group.findByIdAndUpdate(
-            //     {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
-            //     {$push: {students: {
-            //         name: req.body.name,
-            //         subeject_grade: req.body.subeject_grade,
-            //         status: req.body.status
-            //     }}}
-            // )
+          case 23:
             res.cookie('status', 'success-student');
             route = '/' + req.params.groupName + '/students/CRUD';
             console.log(route);
             res.redirect(route);
-            _context6.next = 31;
+            _context6.next = 32;
             break;
 
-          case 28:
-            _context6.prev = 28;
-            _context6.t1 = _context6["catch"](18);
+          case 29:
+            _context6.prev = 29;
+            _context6.t1 = _context6["catch"](19);
             console.log(_context6.t1);
 
-          case 31:
+          case 32:
           case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, null, [[5, 13], [18, 28]]);
+    }, _callee6, null, [[5, 14], [19, 29]]);
   }));
 
   return function (_x7, _x8) {
@@ -545,18 +545,30 @@ router.post('/:groupName/students/add', _tokens.verifyController, /*#__PURE__*/f
 }());
 router.get('/:groupName/students/:id/delete', _tokens.verifyController, /*#__PURE__*/function () {
   var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(req, res) {
+    var stdnId, route;
     return _regenerator["default"].wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            console.log(req.params.id);
+            stdnId = _mongoose["default"].Types.ObjectId(req.params.id);
             _context7.next = 3;
-            return _Stdn["default"].findByIdAndDelete(req.params.id);
+            return _Group["default"].updateOne({
+              grade: req.params.groupName.charAt(0),
+              group: req.params.groupName.charAt(2),
+              career: req.params.groupName.substr(3)
+            }, {
+              $pull: {
+                students: {
+                  _id: stdnId
+                }
+              }
+            });
 
           case 3:
-            res.redirect('/students/CRUD');
+            route = '/' + req.params.groupName + '/students/CRUD';
+            res.redirect(route);
 
-          case 4:
+          case 5:
           case "end":
             return _context7.stop();
         }
@@ -577,7 +589,8 @@ router.get('/:groupName/students/:id/edit', _tokens.verifyController, /*#__PURE_
         switch (_context8.prev = _context8.next) {
           case 0:
             _context8.prev = 0;
-            stdnId = Mongoose.Types.ObjectId(req.params.id);
+            //const stdnId = req.params.id;
+            stdnId = _mongoose["default"].Types.ObjectId(req.params.id);
             _context8.next = 4;
             return _Group["default"].aggregate([{
               $match: {
@@ -589,47 +602,50 @@ router.get('/:groupName/students/:id/edit', _tokens.verifyController, /*#__PURE_
               $unwind: '$students'
             }, {
               $match: {
-                _id: stdnId
+                "students._id": stdnId
               }
             }, {
               $project: {
                 _id: "$students._id",
                 name: "$students.name",
-                subeject_grade: "$students.subeject_grade"
+                subject_grade: "$students.subject_grade",
+                status: "$students.status"
               }
             }]);
 
           case 4:
             object = _context8.sent;
-            //object.lean();
+            object = object[0];
             console.log('objjjetooo-', object);
             console.log((0, _typeof2["default"])(object.status), object.status);
             res.render('edit', {
-              object: object
+              object: object,
+              groupName: req.params.groupName
             });
-            _context8.next = 13;
+            _context8.next = 14;
             break;
 
-          case 10:
-            _context8.prev = 10;
+          case 11:
+            _context8.prev = 11;
             _context8.t0 = _context8["catch"](0);
             console.log(_context8.t0.message);
 
-          case 13:
+          case 14:
           case "end":
             return _context8.stop();
         }
       }
-    }, _callee8, null, [[0, 10]]);
+    }, _callee8, null, [[0, 11]]);
   }));
 
   return function (_x11, _x12) {
     return _ref6.apply(this, arguments);
   };
 }());
-router.post('/:groupNanme/students/:id/edit', _tokens.verifyController, /*#__PURE__*/function () {
+router.post('/:groupName/students/:id/edit', _tokens.verifyController, /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(req, res) {
-    var errors, object;
+    var errors, stdnId, object, _stdnId, route;
+
     return _regenerator["default"].wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
@@ -644,7 +660,7 @@ router.post('/:groupNanme/students/:id/edit', _tokens.verifyController, /*#__PUR
               });
             }
 
-            if (req.body.grade < 0 || req.body.grade > 10) {
+            if (req.body.subject_grade < 0 || req.body.subject_grade > 10) {
               errors.push({
                 text: 'Grade must be between 0 and 10'
               });
@@ -657,46 +673,86 @@ router.post('/:groupNanme/students/:id/edit', _tokens.verifyController, /*#__PUR
             }
 
             if (!(errors.length > 0)) {
-              _context9.next = 19;
+              _context9.next = 23;
               break;
             }
 
             _context9.prev = 7;
-            _context9.next = 10;
-            return _Stdn["default"].findById(req.params.id).lean();
+            //const stdnId = req.params.id;
+            stdnId = _mongoose["default"].Types.ObjectId(req.params.id);
+            _context9.next = 11;
+            return _Group["default"].aggregate([{
+              $match: {
+                grade: req.params.groupName.charAt(0),
+                group: req.params.groupName.charAt(2),
+                career: req.params.groupName.substr(3)
+              }
+            }, {
+              $unwind: '$students'
+            }, {
+              $match: {
+                "students._id": stdnId
+              }
+            }, {
+              $project: {
+                _id: "$students._id",
+                name: "$students.name",
+                subject_grade: "$students.subject_grade",
+                status: "$students.status"
+              }
+            }]);
 
-          case 10:
+          case 11:
             object = _context9.sent;
+            object = object[0];
+            console.log('objjjetooo-', object);
+            console.log((0, _typeof2["default"])(object.status), object.status);
             res.render('edit', {
               object: object,
+              groupName: req.params.groupName,
               errors: errors
             });
-            _context9.next = 17;
+            _context9.next = 21;
             break;
 
-          case 14:
-            _context9.prev = 14;
+          case 18:
+            _context9.prev = 18;
             _context9.t0 = _context9["catch"](7);
             console.log(_context9.t0.message);
 
-          case 17:
-            _context9.next = 23;
+          case 21:
+            _context9.next = 29;
             break;
 
-          case 19:
-            console.log(req.params.id);
-            _context9.next = 22;
-            return _Stdn["default"].findByIdAndUpdate(req.params.id, req.body);
-
-          case 22:
-            res.redirect('/students/CRUD');
-
           case 23:
+            console.log(req.params.id);
+            _stdnId = _mongoose["default"].Types.ObjectId(req.params.id);
+            _context9.next = 27;
+            return _Group["default"].updateOne({
+              grade: req.params.groupName.charAt(0),
+              group: req.params.groupName.charAt(2),
+              career: req.params.groupName.substr(3),
+              "students._id": _stdnId
+            }, {
+              $set: {
+                "students.$": {
+                  name: req.body.name,
+                  subject_grade: req.body.subject_grade,
+                  status: req.body.status
+                }
+              }
+            });
+
+          case 27:
+            route = '/' + req.params.groupName + '/students/CRUD';
+            res.redirect(route);
+
+          case 29:
           case "end":
             return _context9.stop();
         }
       }
-    }, _callee9, null, [[7, 14]]);
+    }, _callee9, null, [[7, 18]]);
   }));
 
   return function (_x13, _x14) {

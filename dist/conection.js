@@ -25,7 +25,7 @@ var _mongoose = require("mongoose");
         case 0:
           _context.prev = 0;
           _context.next = 3;
-          return (0, _mongoose.connect)(process.env.MONGODB_URI_CLOUD);
+          return (0, _mongoose.connect)(process.env.MONGODB_URI_LOCAL);
 
         case 3:
           db = _context.sent;

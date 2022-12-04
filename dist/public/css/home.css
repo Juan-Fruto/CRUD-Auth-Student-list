@@ -11,16 +11,15 @@
     border-radius: 8%;
     border-width: 1px;
     padding-left: 0px;
-    background-image: url("../images/add_light.png");
     border: none;
 }
 
 .add:hover{
-    background-color: rgb(13, 110, 253);
+    /* background-color: rgb(13, 110, 253); */
 }
 
 img:hover{
-    background-image: url("../images/add_light.png");
+    /* background-image: url("../images/add_light.png"); */
 }
 
 .col-md-1 {
@@ -37,7 +36,8 @@ img:hover{
 
 .col-md-1:hover{
     background-color: rgb(102, 153, 51);
-    border-color: rgb(68, 101, 34);
+    border: none;
+    /* border-color: rgb(68, 101, 34); */
     color: white;
 }
 
