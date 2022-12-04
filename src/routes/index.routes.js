@@ -188,13 +188,19 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
     }
     if (errors.length > 0){
         try {
-            const query = await Group.aggregate([{$unwind: '$students'}, {$project: {name: '$students.name', grade: '$students.subeject_grade',  status: '$students.status'}}, {$sort: {name: 1}}]);
+            let query = await Group.aggregate([
+                {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
+                {$unwind: '$students'},
+                {$project: {_id: "$students._id", name: '$students.name', grade: '$students.subject_grade',  status: '$students.status'}},
+                {$sort: {name: 1}}
+            ]);
+            query.forEach(element => element.groupName = req.params.groupName);
             for (let i = 0; i < query.length; i++) {
                 if (query[i].grade == null){
                     query[i].grade = "--";
                 }
             }
-            res.render('crud', {document: query, groupName: req.params.groupName,errors});
+            res.render('crud', {document: query, groupName: req.params.groupName,errors, object: req.body});
         } catch (error) {
             console.log(error.message);
         }
@@ -225,9 +231,18 @@ router.post('/:groupName/students/add', verifyController,async function (req, re
 });
 
 router.get('/:groupName/students/:id/delete', verifyController, async function(req, res){
-    console.log(req.params.id);
-    await Stdn.findByIdAndDelete(req.params.id);
-    res.redirect('/students/CRUD');
+    const stdnId = mongoose.Types.ObjectId(req.params.id);
+    await Group.updateOne({
+        grade: req.params.groupName.charAt(0),
+        group: req.params.groupName.charAt(2),
+        career: req.params.groupName.substr(3),
+    },{
+        $pull: {
+            students: {_id: stdnId}
+        }
+    });
+    const route = '/' + req.params.groupName + '/students/CRUD';
+    res.redirect(route);
 });
 
 //rutas de la interface de edit
@@ -259,7 +274,7 @@ router.post('/:groupName/students/:id/edit', verifyController, async function(re
     if (req.body.name.length == 0) {
         errors.push({text: 'Please insert a name'});
     }
-    if (req.body.subject_grade < 0 || req.body.grade > 10) {
+    if (req.body.subject_grade < 0 || req.body.subject_grade > 10) {
         errors.push({text: 'Grade must be between 0 and 10'});
     }
     if(req.body.status == 'on' || req.body.status == 'true' || req.body.status == 'True' || req.body.status == true){
@@ -269,8 +284,19 @@ router.post('/:groupName/students/:id/edit', verifyController, async function(re
     }
     if (errors.length > 0){
         try {
-            let object = await Stdn.findById(req.params.id).lean();
-            res.render('edit', {object, errors});
+            //const stdnId = req.params.id;
+            const stdnId = mongoose.Types.ObjectId(req.params.id);
+            let object = await Group.aggregate([
+                {$match: {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3)}},
+                {$unwind: '$students'},
+                {$match: {"students._id": stdnId}},
+                {$project: {_id: "$students._id", name: "$students.name", subject_grade: "$students.subject_grade", status: "$students.status"}}
+            ]);
+            object = object[0];
+            console.log('objjjetooo-', object);
+            console.log(typeof object.status, object.status);
+    
+            res.render('edit', {object, groupName: req.params.groupName, errors: errors});
         } catch (error) {
             console.log(error.message);
         }
@@ -279,13 +305,14 @@ router.post('/:groupName/students/:id/edit', verifyController, async function(re
         const stdnId = mongoose.Types.ObjectId(req.params.id);
         await Group.updateOne(
             {grade: req.params.groupName.charAt(0), group: req.params.groupName.charAt(2), career: req.params.groupName.substr(3), "students._id": stdnId},
-            {$set: {students: {
+            {$set: {"students.$": {
                 name: req.body.name,
                 subject_grade: req.body.subject_grade,
                 status: req.body.status
             }}}
         );
-        res.redirect('/students/CRUD');
+        const route = '/' + req.params.groupName + '/students/CRUD';
+        res.redirect(route);
     }
 });
 
