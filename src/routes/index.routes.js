@@ -331,10 +331,10 @@ router.get('/home', verifyController, async function (req, res) {
     console.log('-----groups:', query.groups);
 
     const arrayOfGroups = [];
-    query.groups.forEach(async function (groupId){
-        const atributtesOfGroup = await Group.findById(groupId);
+    query.groups.forEach(function (groupId){
+        const atributtesOfGroup = Group.findById(groupId);
         const {grade, group, career} = atributtesOfGroup;
-        await arrayOfGroups.push(grade + '°' + group + '\n' + career);
+        arrayOfGroups.push(grade + '°' + group + '\n' + career);
     });
 
     res.render('home', {groups: arrayOfGroups, userId: userId});
