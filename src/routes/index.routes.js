@@ -331,8 +331,8 @@ router.get('/home', verifyController, async function (req, res) {
     console.log('-----groups:', query.groups);
 
     const arrayOfGroups = [];
-    query.groups.forEach(function (groupId){
-        const atributtesOfGroup = Group.findById(groupId);
+    query.groups.forEach(async function (groupId){
+        const atributtesOfGroup = await Group.findById(groupId);
         const {grade, group, career} = atributtesOfGroup;
         arrayOfGroups.push(grade + '°' + group + '\n' + career);
     });
