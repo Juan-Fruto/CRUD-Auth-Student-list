@@ -15,7 +15,7 @@ MONGODB_URI_LOCAL = "mongodb://localhost/crud-mongo"
 SECRET = "your secret"
 
 
-And also you need to have nodejs and npm in your computer, here´s a tutorial and a link to the oficial node js website:
+And also you need to have mongodb, nodejs and npm in your computer, here´s a tutorial and a link to the oficial node js website:
 * https://radixweb.com/blog/installing-npm-and-nodejs-on-windows-and-mac
 * https://nodejs.org/en/
 
