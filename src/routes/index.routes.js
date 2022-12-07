@@ -327,15 +327,17 @@ router.get('/about', function (req, res) {
 router.get('/home', verifyController, async function (req, res) {
     const userId = verify(cookie.parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
 
-    const query = await Users.findOne({_id: userId}, 'groups');
-    console.log('-----groups:', query.groups);
+    const user = await Users.findOne({_id: userId}, 'groups');
 
-    const arrayOfGroups = [];
-    await Promise.all([query.groups.forEach(async function (groupId){
-        const atributtesOfGroup = await Group.findById(groupId);
-        const {grade, group, career} = atributtesOfGroup;
-        arrayOfGroups.push(grade + '°' + group + '\n' + career);
-    })]);
+    console.log('what does return this?', user);
+    
+    const allGroups = await Group.find({ _id: { $in: user.groups } }).lean()
+
+    console.log('is it an array on an object?', allGroups);
+
+    const arrayOfGroups = allGroups.map(function (element){
+        return element.grade + '°' + element.group + '\n' + element.career;
+    });
 
     res.render('home', {groups: arrayOfGroups, userId: userId});
 });
