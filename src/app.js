@@ -65,6 +65,10 @@ app.use(
 
 app.use(indexRoutes);
 
+app.use(function(req, res) {
+    res.status(404).render('error404');
+})
+
 //public route
 
 export default app;

@@ -78,7 +78,10 @@ app.use((0, _cookieParser["default"])()); // app.use(function(req, res, next) {
 // });
 // routes
 
-app.use(_index["default"]); //public route
+app.use(_index["default"]);
+app.use(function (req, res) {
+  res.status(404).render('error404');
+}); //public route
 
 var _default = app;
 exports["default"] = _default;
