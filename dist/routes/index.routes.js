@@ -765,60 +765,45 @@ router.get('/about', function (req, res) {
 }); //rutas de la interface home
 
 router.get('/home', _tokens.verifyController, /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(req, res) {
-    var userId, query, arrayOfGroups;
-    return _regenerator["default"].wrap(function _callee11$(_context11) {
+  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(req, res) {
+    var userId, user, allGroups, arrayOfGroups;
+    return _regenerator["default"].wrap(function _callee10$(_context10) {
       while (1) {
-        switch (_context11.prev = _context11.next) {
+        switch (_context10.prev = _context10.next) {
           case 0:
             userId = (0, _jsonwebtoken.verify)(_cookie["default"].parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
-            _context11.next = 3;
+            _context10.next = 3;
             return _Users["default"].findOne({
               _id: userId
             }, 'groups');
 
           case 3:
-            query = _context11.sent;
-            console.log('-----groups:', query.groups);
-            arrayOfGroups = [];
-            query.groups.forEach( /*#__PURE__*/function () {
-              var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(groupId) {
-                var atributtesOfGroup, grade, group, career;
-                return _regenerator["default"].wrap(function _callee10$(_context10) {
-                  while (1) {
-                    switch (_context10.prev = _context10.next) {
-                      case 0:
-                        _context10.next = 2;
-                        return _Group["default"].findById(groupId);
+            user = _context10.sent;
+            console.log('what does return this?', user);
+            _context10.next = 7;
+            return _Group["default"].find({
+              _id: {
+                $in: user.groups
+              }
+            }).lean();
 
-                      case 2:
-                        atributtesOfGroup = _context10.sent;
-                        grade = atributtesOfGroup.grade, group = atributtesOfGroup.group, career = atributtesOfGroup.career;
-                        arrayOfGroups.push(grade + '°' + group + '\n' + career);
-
-                      case 5:
-                      case "end":
-                        return _context10.stop();
-                    }
-                  }
-                }, _callee10);
-              }));
-
-              return function (_x17) {
-                return _ref9.apply(this, arguments);
-              };
-            }());
+          case 7:
+            allGroups = _context10.sent;
+            console.log('is it an array on an object?', allGroups);
+            arrayOfGroups = allGroups.map(function (element) {
+              return element.grade + '°' + element.group + '\n' + element.career;
+            });
             res.render('home', {
               groups: arrayOfGroups,
               userId: userId
             });
 
-          case 8:
+          case 11:
           case "end":
-            return _context11.stop();
+            return _context10.stop();
         }
       }
-    }, _callee11);
+    }, _callee10);
   }));
 
   return function (_x15, _x16) {
@@ -832,21 +817,21 @@ router.get('/home/group/:id', _tokens.verifyController, function (req, res) {
   });
 });
 router.post('/home/group/:id/add', _tokens.verifyController, /*#__PURE__*/function () {
-  var _ref10 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee13(req, res) {
+  var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12(req, res) {
     var _req$body3, grade, group, career, groupId, existingGroups, saveG, _saveG, errors;
 
-    return _regenerator["default"].wrap(function _callee13$(_context13) {
+    return _regenerator["default"].wrap(function _callee12$(_context12) {
       while (1) {
-        switch (_context13.prev = _context13.next) {
+        switch (_context12.prev = _context12.next) {
           case 0:
             _saveG = function _saveG3() {
-              _saveG = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12() {
+              _saveG = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11() {
                 var groupSaved;
-                return _regenerator["default"].wrap(function _callee12$(_context12) {
+                return _regenerator["default"].wrap(function _callee11$(_context11) {
                   while (1) {
-                    switch (_context12.prev = _context12.next) {
+                    switch (_context11.prev = _context11.next) {
                       case 0:
-                        _context12.next = 2;
+                        _context11.next = 2;
                         return _Users["default"].findByIdAndUpdate(req.params.id, {
                           $push: {
                             groups: groupId
@@ -854,16 +839,16 @@ router.post('/home/group/:id/add', _tokens.verifyController, /*#__PURE__*/functi
                         });
 
                       case 2:
-                        groupSaved = _context12.sent;
+                        groupSaved = _context11.sent;
                         groupSaved.save();
                         res.redirect('/home');
 
                       case 5:
                       case "end":
-                        return _context12.stop();
+                        return _context11.stop();
                     }
                   }
-                }, _callee12);
+                }, _callee11);
               }));
               return _saveG.apply(this, arguments);
             };
@@ -875,7 +860,7 @@ router.post('/home/group/:id/add', _tokens.verifyController, /*#__PURE__*/functi
             //actualizar en la coleccion original e insertar a la coleccion del usuario que guarde los grupos en home, hacer
             //validators para dicha funcion, verficar que no se repitan las clases
             _req$body3 = req.body, grade = _req$body3.grade, group = _req$body3.group, career = _req$body3.career;
-            _context13.next = 5;
+            _context12.next = 5;
             return _Group["default"].findOne({
               grade: grade,
               group: group,
@@ -883,13 +868,13 @@ router.post('/home/group/:id/add', _tokens.verifyController, /*#__PURE__*/functi
             }, '_id');
 
           case 5:
-            groupId = _context13.sent;
+            groupId = _context12.sent;
             groupId = groupId._id.valueOf();
-            _context13.next = 9;
+            _context12.next = 9;
             return _Users["default"].findById(req.params.id, 'groups');
 
           case 9:
-            existingGroups = _context13.sent;
+            existingGroups = _context12.sent;
 
             try {
               errors = [];
@@ -933,33 +918,33 @@ router.post('/home/group/:id/add', _tokens.verifyController, /*#__PURE__*/functi
 
           case 11:
           case "end":
-            return _context13.stop();
+            return _context12.stop();
         }
       }
-    }, _callee13);
+    }, _callee12);
   }));
 
-  return function (_x18, _x19) {
-    return _ref10.apply(this, arguments);
+  return function (_x17, _x18) {
+    return _ref9.apply(this, arguments);
   };
 }());
 router.get('/recover', function (req, res) {
   res.send('<body style="background-color: rgb(102, 153, 51)"><h1 style="text-align: center; margin: 20% 0%; color: white; font-size: 50px;">Coming Soon</h1></body>');
 });
 router.get('/profile', _tokens.verifyController, /*#__PURE__*/function () {
-  var _ref11 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee14(req, res) {
+  var _ref10 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee13(req, res) {
     var userId, userData, names, lastName, email, username, password;
-    return _regenerator["default"].wrap(function _callee14$(_context14) {
+    return _regenerator["default"].wrap(function _callee13$(_context13) {
       while (1) {
-        switch (_context14.prev = _context14.next) {
+        switch (_context13.prev = _context13.next) {
           case 0:
             console.log(_cookie["default"].parse(req.cookies.sesionToken));
             userId = (0, _jsonwebtoken.verify)(_cookie["default"].parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
-            _context14.next = 4;
+            _context13.next = 4;
             return _Users["default"].findById(userId);
 
           case 4:
-            userData = _context14.sent;
+            userData = _context13.sent;
             names = userData.names, lastName = userData.lastName, email = userData.email, username = userData.username, password = userData.password;
             res.render('profile', {
               names: names,
@@ -971,14 +956,14 @@ router.get('/profile', _tokens.verifyController, /*#__PURE__*/function () {
 
           case 7:
           case "end":
-            return _context14.stop();
+            return _context13.stop();
         }
       }
-    }, _callee14);
+    }, _callee13);
   }));
 
-  return function (_x20, _x21) {
-    return _ref11.apply(this, arguments);
+  return function (_x19, _x20) {
+    return _ref10.apply(this, arguments);
   };
 }());
 router.get('/logout', _tokens.logoutController);

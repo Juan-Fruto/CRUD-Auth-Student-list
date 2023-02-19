@@ -6,6 +6,8 @@ export const createGroups = async function (){
         
         if (cardinality == 0){
 
+            // hacer una funcion de lo siguiente que reciba de paramtro la carrera
+
             //groups of ICI
             for(let i = 1; i <= 9; i++){
                 for(let j = 1; j<= 3; j++){

@@ -26,7 +26,8 @@
             {
                 background-color: rgb(102, 153, 51);
             }
-        </style> 
+        </style>
+    {{!-- show the navigation bar  --}}
     {{else}}
         {{>  navbar }}
         <style type = "text/css">
@@ -37,6 +38,8 @@
         </style> 
         
     {{/if}}
+
+    {{!-- messages --}}
 
     {{#if errors}}
         <div class="container-sm">
@@ -50,6 +53,8 @@
         </div>
     {{/if}} 
 
+    {{!-- body --}}
+    
     {{{ body }}} 
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
