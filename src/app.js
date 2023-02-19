@@ -52,7 +52,7 @@ app.use(
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.use(express.static(path.join(__dirname, "public")));
+  app.use("/public" ,express.static(path.join(__dirname, "public")));
 
   app.use(cookieParser());
 
@@ -64,6 +64,10 @@ app.use(
 // routes
 
 app.use(indexRoutes);
+
+app.use(function (req, res) {
+  res.sendStatus(404).render('error404');
+})
 
 //public route
 
