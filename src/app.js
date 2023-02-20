@@ -42,24 +42,19 @@ app.set('view engine', '.hbs')
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: false}));
 app.use(
-    session({
-      secret: "secret",
-      resave: true,
-      saveUninitialized: true,
-      store: MongoStore.create({ mongoUrl: "mongodb://localhost/crud-mongo" })
-    })
-  );
-  app.use(passport.initialize());
-  app.use(passport.session());
+  session({
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: "mongodb://localhost/crud-mongo" })
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-  app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
-  app.use(cookieParser());
-
-  // app.use(function(req, res, next) {
-  //   res.status(404).render('error404', {noNavBar: true});
-  // });
-  
+app.use(cookieParser());
 
 // routes
 
