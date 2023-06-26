@@ -57,8 +57,4 @@ usersSchema.methods.matchPassword = async function (password){
     return await brcypt.compare(password, this.password);
 };
 
-// usersSchema.methods.comparePassword = async function (password) {
-//     return brcypt.compare(password, this.password);
-// };
-
 export default model('Users', usersSchema);

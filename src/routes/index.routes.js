@@ -384,7 +384,7 @@ router.post('/home/group/:id/add', verifyController, async function (req, res){
             saveG();
         }
     } catch (error) {
-
+        console.log(error.message);
     }
 
 });
