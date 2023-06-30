@@ -1,5 +1,8 @@
 import express from 'express';
 import indexRoutes from './routes/index.routes';
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import groupRoutes from './routes/group.routes';
 import * as dotenv from 'dotenv';
 import { engine } from 'express-handlebars';
 import path from 'path';
@@ -59,6 +62,9 @@ app.use(cookieParser());
 // routes
 
 app.use(indexRoutes);
+app.use(authRoutes);
+app.use(userRoutes);
+app.use(groupRoutes);
 
 app.use(function(req, res) {
   res.status(404).render('error404', {noNavBar: true, register: true});
