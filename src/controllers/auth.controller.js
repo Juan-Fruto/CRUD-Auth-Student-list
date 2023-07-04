@@ -130,5 +130,7 @@ export async function registerHandler (req, res) {
 }
 
 export function recoverAccount(req, res) {
-  res.send('<body style="background-color: rgb(102, 153, 51)"><h1 style="text-align: center; margin: 20% 0%; color: white; font-size: 50px;">Coming Soon</h1></body>');
-}
+  res.render('recoverPassword', {
+    noNavBar: true,
+  })
+} 

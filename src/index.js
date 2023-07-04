@@ -1,6 +1,5 @@
 import app from './app';
-import './conection';
-
+import './dbConection';
 
 // server is listening
 
