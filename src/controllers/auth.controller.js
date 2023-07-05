@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import Users from '../models/Users';
 import {serialize} from 'cookie';
+import { Transporter } from '../libs/nodemailer';
+import { google } from 'googleapis';
 import 'cookie-parser';
 
 //controladores de la interface de login
@@ -129,8 +131,60 @@ export async function registerHandler (req, res) {
   }
 }
 
-export function recoverAccount(req, res) {
+export function recoverPasswordRender(req, res) {
   res.render('recoverPassword', {
     noNavBar: true,
   })
 } 
+
+export async function recoverPasswordHandler(req, res) {
+  
+  const {email} = req.body;
+
+  try {
+    const userFromMongo = await Users.findOne({email});
+    console.log(userFromMongo);
+
+    if(userFromMongo == null || userFromMongo.length ==0) return res.render('recoverPassword', {
+        noNavBar: true,
+        errors: [{text: "The email is not on the system"}]
+    });
+
+    const id = userFromMongo._id
+    const token = jwt.sign({email, id}, process.env.SECRET, {expiresIn: 60*5});
+    
+    // google api config
+
+    const oauth2Client = new google.auth.OAuth2(
+        process.env.OAUTH2_CLIENT_ID,
+        process.env.OAUTH2_CLIENT_SECRET,
+        process.env.OAUTH2_REDIRECT_URL
+    );
+
+    oauth2Client.setCredentials({refresh_token: process.env.OAUTH2_REFRESH_TOKEN});
+    const accessToken = await oauth2Client.getAccessToken();
+
+    // nodemailer
+
+    const transporter = Transporter(accessToken);
+
+    var mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Password Reset",
+        text: `${token}`
+    };
+  
+    transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("Email sent: " + info.response);
+        res.status(200).send(info.response);
+    }
+    });
+      
+  } catch (error) {
+      console.error('error', error);
+  }
+}

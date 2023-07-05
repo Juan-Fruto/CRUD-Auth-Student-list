@@ -4,7 +4,8 @@ import {
     loginHandler,
     renderRegister,
     registerHandler,
-    recoverAccount
+    recoverPasswordRender,
+    recoverPasswordHandler
 } from '../controllers/auth.controller';
 import {logoutController} from '../middlewares/tokens';
 import 'cookie-parser';
@@ -23,7 +24,9 @@ router.get('/register', renderRegister);
 
 router.post('/register', registerHandler);
 
-router.get('/recover', recoverAccount);
+router.get('/recover', recoverPasswordRender);
+
+router.post('/recover', recoverPasswordHandler);
 
 router.get('/logout', logoutController);
 

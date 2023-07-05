@@ -22,9 +22,11 @@
     "express": "^4.18.1",
     "express-handlebars": "^6.0.6",
     "express-session": "^1.17.3",
+    "googleapis": "^120.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.8.2",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.9.3",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0"
   },
@@ -33,7 +35,7 @@
     "@babel/core": "^7.18.10",
     "@babel/node": "^7.2.2",
     "@babel/plugin-transform-runtime": "^7.0.0",
-    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-env": "^7.12.17",
     "ncp": "^2.0.0",
     "nodemon": "^1.14.9"
   }
