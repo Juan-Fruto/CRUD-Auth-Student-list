@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="../../public/css/verify.css">
+
+<br/><br/>
+<div class="alert alert-danger alert-dismissible fade show" style="display: none;" role="alert" id="expiredMessage">
+    
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<br/><br/>
+<div class="container-md mt-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <div class="card card-body p-4 border-3" style="color: black; background-color: rgb(228, 228, 228); border: none;">
+        <div class="mt-2 mb-2 me-5 ms-5">
+
+          <h1 class="text-center mb-4">Verify Token</h1>
+          <p class="text-center mb-0">A 5-digit verification code has been sent to your email</p>
+          <p class="text-center mt-0">The token will expire in </p>
+          <div class="countdown-container">
+            <div class="countdown-digit" id="minutes">00</div>
+            <div class="countdown-digit" id="separator">:</div>
+            <div class="countdown-digit" id="seconds">00</div>
+          </div>
+
+          <form class="row" action="/recover/verify/{{id}}?email={{email}}&expiration={{tokenExpiration}}" method="POST" id="verifyForm">
+            <div class="mb-3 d-flex justify-content-center">
+              <input type="text" class="form-control me-2" maxlength="1" required autofocus>
+              <input type="text" class="form-control me-2" maxlength="1" required>
+              <input type="text" class="form-control me-2" maxlength="1" required>
+              <input type="text" class="form-control me-2" maxlength="1" required>
+              <input type="text" class="form-control me-2" maxlength="1" required>
+              <input type="text" class="form-control d-none" id="token" name="token" required>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" id="continueButton" onclick="submitForm(event)">Continue</button>
+            </div>
+          </form><br/>
+
+          <div class="row">
+            <form class="col-md-7" action="/recover" method="POST" id="resendForm">
+              <p>Didn't you receive the code?</p>
+              <input type="email" name="email" style="display: none" value="{{email}}">
+            </form>
+            <div class="col-md-5">
+              <a href="#" onclick="document.getElementById('resendForm').submit(); return false;" class="a-right">
+                <p class="text-end">Resend</p>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{!-- handlebars expressions for js script--}}
+<div id="tokenExpiration" data-myparam="{{tokenExpiration}}"></div>
+
+<script src="../../public/js/verify.recover.js"></script>
+
+
+
