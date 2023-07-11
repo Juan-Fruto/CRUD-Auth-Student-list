@@ -1,4 +1,4 @@
-# CRUD
+# Student List - CRUD & Auth
 CRUD de lista de alumnos con NodeJS Express MongoDB
 
 
