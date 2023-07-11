@@ -1,0 +1,14 @@
+.countdown-container {
+  margin-top:   10px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
+}
+
+.countdown-digit {
+  font-size: 1.2rem;
+  margin: 0 0.1.5rem;
+  transition: all 0.3s ease;
+}

@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken';
+import jwt, { sign, verify } from 'jsonwebtoken';
 import Users from '../models/Users';
 import {serialize} from 'cookie';
+import { emailTokenGenerator, emailTokenValidator } from '../helpers/emailToken'
 import { Transporter } from '../libs/nodemailer';
 import { google } from 'googleapis';
 import 'cookie-parser';
@@ -46,7 +47,7 @@ export async function loginHandler (req, res){
       if (errors.length > 0){
           res.render('login', {errors: errors, username,noNavBar: true, login: true});
       } else {
-          const token = jwt.sign({id: usernameFromMongo._id}, process.env.SECRET, {expiresIn: 60*60*24});
+          const token = jwt.sign({id: usernameFromMongo._id}, process.env.AUTH_SECRET, {expiresIn: 60*60*24});
           const serialized = serialize('tokenId', token, {
               httpOnly: true,
               secure: false, //true when it is on production: process.env.NODE_ENV == ‘production’,
@@ -78,7 +79,7 @@ export async function registerHandler (req, res) {
       const userSaved = await user.save();
       console.log('user saved as', userSaved);
 
-      const token = jwt.sign({id: userSaved._id}, process.env.SECRET, {expiresIn: 60*60*24});
+      const token = jwt.sign({id: userSaved._id}, process.env.AUTH_SECRET, {expiresIn: 60*60*24});
       console.log(token);
       
       // res.send({succes: "The account has been successfully created"});
@@ -132,7 +133,7 @@ export async function registerHandler (req, res) {
 }
 
 export function recoverPasswordRender(req, res) {
-  res.render('recoverPassword', {
+  res.render('email.recover.hbs', {
     noNavBar: true,
   })
 } 
@@ -145,13 +146,13 @@ export async function recoverPasswordHandler(req, res) {
     const userFromMongo = await Users.findOne({email});
     console.log(userFromMongo);
 
-    if(userFromMongo == null || userFromMongo.length ==0) return res.render('recoverPassword', {
+    if(userFromMongo == null || userFromMongo.length ==0) return res.render('email.recover.hbs', {
         noNavBar: true,
         errors: [{text: "The email is not on the system"}]
     });
 
     const id = userFromMongo._id
-    const token = jwt.sign({email, id}, process.env.SECRET, {expiresIn: 60*5});
+    //const token = jwt.sign({email, id}, process.env.AUTH_SECRET, {expiresIn: 60*5});
     
     // google api config
 
@@ -168,11 +169,19 @@ export async function recoverPasswordHandler(req, res) {
 
     const transporter = Transporter(accessToken);
 
+    // emailTokenGenerator gets the time in seconds
+    const emailToken = emailTokenGenerator(60*5);
+
     var mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Password Reset",
-        text: `${token}`
+        html: `
+            <p>Hi there👋, here´s your token to continue the process of resetting your password</p>
+            <h4><b>${emailToken}</b></h4>
+            <p style="color: #cc8600;">Don´t share the token<p><br/>
+            <p>Student List system<p>
+        `
     };
   
     transporter.sendMail(mailOptions, function (error, info) {
@@ -180,11 +189,114 @@ export async function recoverPasswordHandler(req, res) {
         console.log(error);
     } else {
         console.log("Email sent: " + info.response);
-        res.status(200).send(info.response);
+
+        const expirationDuration = 5 * 60; // 5 minutes
+        const tokenExpiration = Math.floor(Date.now() / 1000) + expirationDuration;
+
+        res.redirect(`/recover/verify/${id}?email=${email}&expiration=${tokenExpiration}`);
     }
     });
       
   } catch (error) {
       console.error('error', error);
   }
+}
+
+export function verifyRecoverPasswordRender(req, res) {
+    const {id} = req.params;
+    const {expiration, email} = req.query;
+    console.log(expiration);
+
+    res.render('verify.recover.hbs', {
+        noNavBar: true,
+        email: email || null,
+        tokenExpiration: expiration || null,
+        id: id
+    });
+}
+
+export function verifyRecoverPasswordHandler(req, res) {
+    const {id} = req.params;
+    const {token} = req.body;
+    const {email, expiration} = req.query;
+    
+    const isValid = emailTokenValidator(token);
+    console.log(isValid);
+
+    if(!isValid) {
+        return res.render('verify.recover.hbs', {
+            noNavBar: true,
+            email: email || null,
+            tokenExpiration: expiration || null,
+            id: id,
+            errors: [{text: 'Invalid token'}]
+        });
+    }
+
+    const jwtToken = sign({id}, process.env.RESET_SECRET, {expiresIn: 60*20})
+    
+    res.redirect(`/recover/reset-password/${id}/${jwtToken}`);
+}
+
+export async function resetPasswordRender(req, res) {
+  try {
+    const {id, jwtToken} = req.params
+    const {errors} = req
+    console.log("errors in the controller", errors);
+    
+    // renderization
+    if(errors.length > 0){
+      return res.render('verify.recover.hbs', {
+        noNavBar: true,
+        errors: errors
+      });
+    }
+
+    res.render('reset.recover.hbs', {
+        id: id,
+        jwtToken: jwtToken,
+        noNavBar: true
+    });
+  } catch (error) {
+    return res.render('verify.recover.hbs', {
+        noNavBar: true,
+        errors: error.message
+    });
+  }
+}
+
+export async function resetPasswordHandler(req, res) {
+  //validatios for password 
+  try {
+    const {id, jwtToken} = req.params;
+    console.log(req.body)
+    const {newPassword, confirmPassword} = req.body;
+    const {errors} = req
+    console.log("errors in the controller", errors);
+    
+    // password validations
+    if(newPassword !== confirmPassword) errors.push({text: 'Passwords don´t match'});
+
+    if(newPassword.length < 4 || newPassword.length > 12) errors.push({text: 'Password must be 4 to 12 characters'});
+
+    // renderization
+    if(errors.length > 0){
+      return res.render('reset.recover.hbs', {
+        noNavBar: true,
+        id: id,
+        jwtToken: jwtToken,
+        errors: errors
+      });
+    }
+    
+    const userSaved = await Users.findById(id);
+    userSaved.password = await userSaved.encryptPassword(newPassword);
+    userSaved.save();
+
+    res.redirect('/');
+
+  } catch (error) {
+      console.error('error', error);
+  }
+  //uptade password in the db
 }

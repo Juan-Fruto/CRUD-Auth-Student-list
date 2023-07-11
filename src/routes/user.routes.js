@@ -1,11 +1,11 @@
 import { Router} from 'express';
-import {verifyController} from '../middlewares/tokens';
+import {verifyAuthToken} from '../middlewares/tokens';
 import { renderProfile } from '../controllers/user.controller'
 import 'cookie-parser';
 
 const router = Router();
 
-router.get('/profile', verifyController, renderProfile);
+router.get('/profile', verifyAuthToken, renderProfile);
 
 
 export default router;

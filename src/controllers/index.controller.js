@@ -7,7 +7,7 @@ import 'cookie-parser';
 //controlador de la interface home
 
 export async function renderHome (req, res) {
-    const userId = verify(cookie.parse(req.cookies.sesionToken).tokenId, process.env.SECRET).id;
+    const userId = verify(cookie.parse(req.cookies.sesionToken).tokenId, process.env.AUTH_SECRET).id;
 
     const user = await Users.findOne({_id: userId}, 'groups');
 

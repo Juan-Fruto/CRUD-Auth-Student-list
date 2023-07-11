@@ -10,7 +10,7 @@ export async function renderProfile(req, res){
 
   const userId = verify(
       cookie.parse(req.cookies.sesionToken).tokenId,
-      process.env.SECRET
+      process.env.AUTH_SECRET
   ).id;
   const userData = await Users.findById(userId);
   const {names, lastName, email, username, password} = userData;

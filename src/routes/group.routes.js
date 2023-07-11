@@ -8,27 +8,27 @@ import {
     editStudentRender,
     editStudentHandler,
 } from '../controllers/group.controller';
-import {verifyController} from '../middlewares/tokens';
+import {verifyAuthToken} from '../middlewares/tokens';
 import 'cookie-parser';
 
 const router = Router();
 
 //rutas de la interface de CRUD
 
-router.get('/home/group/:id', verifyController, renderAddGroup);
+router.get('/home/group/:id', verifyAuthToken, renderAddGroup);
 
-router.post('/home/group/:id/add', verifyController, addGroupHandler);
+router.post('/home/group/:id/add', verifyAuthToken, addGroupHandler);
 
-router.get('/:groupName/students/CRUD', verifyController, studentList);
+router.get('/:groupName/students/CRUD', verifyAuthToken, studentList);
 
-router.post('/:groupName/students/add', verifyController, addStudentHandler);
+router.post('/:groupName/students/add', verifyAuthToken, addStudentHandler);
 
-router.get('/:groupName/students/:id/delete', verifyController, deleteStudentHandler);
+router.get('/:groupName/students/:id/delete', verifyAuthToken, deleteStudentHandler);
 
 //rutas de la interface de edit
 
-router.get('/:groupName/students/:id/edit', verifyController, editStudentRender);
+router.get('/:groupName/students/:id/edit', verifyAuthToken, editStudentRender);
 
-router.post('/:groupName/students/:id/edit', verifyController, editStudentHandler);
+router.post('/:groupName/students/:id/edit', verifyAuthToken, editStudentHandler);
 
 export default router;
