@@ -27,7 +27,7 @@ OAUTH2_REDIRECT_URL = '***'
 EMAIL_USER = "a-user@gmail.com"
 
 This tutorial could help you to get the oauth2 variables:
-https://www.youtube.com/watch?v=-rcRf7yswfM&t=185s&ab_channel=MafiaCodes
+* https://www.youtube.com/watch?v=-rcRf7yswfM&t=185s&ab_channel=MafiaCodes
 
 And also you need to have mongodb, nodejs and npm in your computer, here´s a tutorial and a link to the oficial node js website:
 * https://radixweb.com/blog/installing-npm-and-nodejs-on-windows-and-mac
